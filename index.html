@@ -60,15 +60,18 @@
                     <i class="fa-solid fa-graduation-cap text-blue-600 text-3xl animate-bounce"></i>
                     <div>
                         <h1 class="text-lg md:text-xl font-bold text-slate-900">מפצח המבחנים: פיתוח יישומי אינטרנט</h1>
-                        <p class="text-[10px] text-slate-500">מיקוד מושלם ל-20 שאלות המבחן על בסיס הסיכום של ירדן</p>
+                        <p class="text-[10px] text-slate-500">מיקוד מושלם ומורחב ל-25 שאלות המבחן על בסיס חומרי הלימוד והמצגות</p>
                     </div>
                 </div>
                 
                 <!-- Desktop Navigation tabs -->
                 <div class="hidden lg:flex space-x-6 space-x-reverse text-sm font-semibold">
-                    <button onclick="switchTab('study')" class="tab-btn active py-5 px-1" id="tab-study">כרטיסיות למידה (20 מושגים)</button>
+                    <button onclick="switchTab('study')" class="tab-btn active py-5 px-1" id="tab-study">כרטיסיות למידה (25 מושגים)</button>
+                    <button onclick="switchTab('visual')" class="tab-btn py-5 px-1" id="tab-visual">
+                        <i class="fa-solid fa-layer-group text-cyan-500 ml-1"></i> 🏗️ ארכיטקטורה ומבנים חזותיים
+                    </button>
                     <button onclick="switchTab('quiz')" class="tab-btn py-5 px-1" id="tab-quiz">
-                        <i class="fa-solid fa-list-check text-rose-500 ml-1"></i> בוחן מסכם (20 שאלות)
+                        <i class="fa-solid fa-list-check text-rose-500 ml-1"></i> בוחן מסכם (25 שאלות)
                     </button>
                     <button onclick="switchTab('simulator')" class="tab-btn py-5 px-1" id="tab-simulator">
                         <i class="fa-solid fa-laptop-code text-indigo-500 ml-1"></i> סימולטור שאלות AI
@@ -85,7 +88,7 @@
                     <button onclick="toggleSettingsModal()" class="text-slate-500 hover:text-blue-600 p-2 rounded-full hover:bg-slate-100 transition" title="הגדרות Gemini API">
                         <i class="fa-solid fa-gear text-lg"></i>
                     </button>
-                    <div class="relative w-36 md:w-48" id="searchContainer">
+                    <div class="relative w-36 md:w-48 hidden" id="searchContainer">
                         <input type="text" id="searchInput" onkeyup="filterConcepts()" placeholder="חפש מושג/שאלה..." class="w-full pl-4 pr-8 py-1.5 border border-slate-300 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-slate-400 text-xs"></i>
                     </div>
@@ -95,6 +98,7 @@
             <!-- Mobile Horizontal Navigation Tabs -->
             <div class="flex lg:hidden border-t border-slate-100 bg-slate-50 overflow-x-auto whitespace-nowrap text-xs font-semibold px-2 py-1.5">
                 <button onclick="switchTab('study')" class="tab-btn-mobile px-3 py-1.5 text-slate-700 rounded-full ml-1" id="tab-m-study">כרטיסיות</button>
+                <button onclick="switchTab('visual')" class="tab-btn-mobile px-3 py-1.5 text-slate-700 rounded-full ml-1" id="tab-m-visual">מבנים חזותיים</button>
                 <button onclick="switchTab('quiz')" class="tab-btn-mobile px-3 py-1.5 text-slate-700 rounded-full ml-1" id="tab-m-quiz">בוחן מסכם</button>
                 <button onclick="switchTab('simulator')" class="tab-btn-mobile px-3 py-1.5 text-slate-700 rounded-full ml-1" id="tab-m-simulator">סימולטור AI</button>
                 <button onclick="switchTab('tutor')" class="tab-btn-mobile px-3 py-1.5 text-slate-700 rounded-full ml-1" id="tab-m-tutor">מורה AI</button>
@@ -110,7 +114,7 @@
                 <aside class="w-full lg:w-64 bg-slate-50 border-l border-slate-200 p-4 shrink-0">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">סינון קטגוריה</h3>
                     <nav class="space-y-1" id="categoryNav">
-                        <button onclick="setCategory('all')" class="sidebar-item active w-full text-right px-3 py-2 rounded-lg text-xs font-semibold transition-all">הכל (20 המושגים למבחן)</button>
+                        <button onclick="setCategory('all')" class="sidebar-item active w-full text-right px-3 py-2 rounded-lg text-xs font-semibold transition-all">הכל (25 המושגים المורחבים)</button>
                         <button onclick="setCategory('html')" class="sidebar-item w-full text-right px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">HTML / HTML5 סמנטי</button>
                         <button onclick="setCategory('css')" class="sidebar-item w-full text-right px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">CSS & סלקטורים</button>
                         <button onclick="setCategory('js')" class="sidebar-item w-full text-right px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">JavaScript & DOM</button>
@@ -118,20 +122,28 @@
                         <button onclick="setCategory('data')" class="sidebar-item w-full text-right px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">JSON, Cookies & Session</button>
                     </nav>
 
-                    <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                        <p class="text-xs text-blue-900 font-semibold mb-2">חלוקת שפות הדפדפן (Frontend):</p>
-                        <div class="h-28">
-                            <canvas id="browserLangsChart"></canvas>
-                        </div>
+                    <div class="mt-4 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                        <p class="text-[11px] text-blue-900 font-bold mb-1.5">הדפדפן (Frontend):</p>
+                        <div class="h-24"><canvas id="browserLangsChart"></canvas></div>
+                    </div>
+
+                    <div class="mt-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <p class="text-[11px] text-emerald-900 font-bold mb-1.5">זיהוי משתמש (נפח אחסון):</p>
+                        <div class="h-24"><canvas id="storageChart"></canvas></div>
+                    </div>
+
+                    <div class="mt-3 p-3 bg-amber-50 rounded-xl border border-amber-100">
+                        <p class="text-[11px] text-amber-900 font-bold mb-1.5">זמן גישה ל-DB (במילישניות):</p>
+                        <div class="h-24"><canvas id="dbAccessChart"></canvas></div>
                     </div>
                 </aside>
 
                 <!-- Concepts Core Grid -->
                 <main class="flex-1 p-4 md:p-6 overflow-y-auto">
                     <section id="intro" class="mb-6 bg-blue-600 text-white rounded-xl p-5 shadow">
-                        <h2 class="text-xl font-bold mb-2">מרכז למידה ממוקד ומפצח - ללא חומר עזר!</h2>
+                        <h2 class="text-xl font-bold mb-2">מרכז למידה ממוקד ומפצח - גרסה מורחבת</h2>
                         <p class="text-xs text-blue-100 leading-relaxed">
-                            המבחן מכיל בדיוק את 20 השאלות המופיעות פה. 4 שאלות מתוכן הן שאלות מתנה זהות לחלוטין לקובץ הדוגמה (מסומנות בתווית זהב). שאר 16 השאלות יתבססו על הדגשים, קטעי הקוד ומלכודות המרצה המפורטות להלן.
+                            הסימולטור המורחב מכיל כעת 25 כרטיסיות לימוד ושאלות תרגול מלאות המכסות את כלל מצגות הקורס, מבני ה-Backend, ניהול זיכרון, ופונקציות מתקדמות. חפש את סימוני ה"מתנה" והמלכודות של המרצה.
                         </p>
                     </section>
 
@@ -169,12 +181,128 @@
                 </main>
             </div>
 
-            <!-- QUIZ TAB (20 Complete questions) -->
+            <!-- VISUAL ARCHITECTURE TAB -->
+            <div id="tab-content-visual" class="hidden w-full p-4 md:p-6">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl p-5 text-white shadow">
+                        <h2 class="text-lg font-bold mb-1"><i class="fa-solid fa-cubes mr-1"></i> ארכיטקטורה מבנית והיררכיית HTML5 חזותית</h2>
+                        <p class="text-cyan-100 text-xs">הדמיות ויזואליות אינטראקטיביות לעין על מנת להבין ולזכור את חוקי המבנה של דפי אינטרנט ואפליקציות Web שלמות.</p>
+                    </div>
+
+                    <!-- HTML5 Structure Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- תקין -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded uppercase block w-fit mb-2">🟢 מבנה חוקי ותקין של HTML5</span>
+                                <h3 class="text-xs font-bold text-slate-700 mb-3">אלמנט main כבן ישיר ועצמאי של ה-body:</h3>
+                                <div class="border-2 border-slate-300 rounded-xl p-4 bg-slate-50 font-mono text-xs text-center space-y-2">
+                                    <div class="bg-slate-200 p-1.5 rounded border border-slate-300 text-slate-700 font-bold">&lt;body&gt;</div>
+                                    <div class="grid grid-cols-1 gap-2 p-2 bg-white rounded border border-slate-200">
+                                        <div class="bg-blue-100 p-2 rounded border border-blue-200 text-blue-800 font-semibold">&lt;header&gt; (כותרת וניווט האתר)</div>
+                                        <div class="bg-emerald-500 p-4 rounded border border-emerald-600 text-white font-bold shadow-sm">
+                                            &lt;main&gt; (התוכן המרכזי והייחודי של הדף)
+                                            <div class="mt-2 bg-emerald-600/30 p-2 rounded text-[11px] font-mono text-right dir-ltr text-left text-white">&lt;article&gt; מאמר פנימי חוקי &lt;/article&gt;</div>
+                                        </div>
+                                        <div class="bg-slate-100 p-2 rounded border border-slate-200 text-slate-600 font-semibold">&lt;footer&gt; (תחתית הדף)</div>
+                                    </div>
+                                    <div class="bg-slate-200 p-1.5 rounded border border-slate-300 text-slate-700 font-bold">&lt;/body&gt;</div>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-3 leading-relaxed"><strong>מדוע זה תקין?</strong> יש רק אלמנט <code>&lt;main&gt;</code> אחד בדף, והוא עומד כ"אח" עצמאי ל-header ול-footer, ולא מוכל בתוך תג סמנטי אחר.</p>
+                        </div>
+
+                        <!-- לא תקין -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded uppercase block w-fit mb-2">🔴 מבנה שגוי ולא חוקי (מלכודת המרצה)</span>
+                                <h3 class="text-xs font-bold text-slate-700 mb-3">אלמנט main מוכל בתוך תג סמנטי אחר:</h3>
+                                <div class="border-2 border-red-200 rounded-xl p-4 bg-red-50/50 font-mono text-xs text-center space-y-2">
+                                    <div class="bg-slate-200 p-1.5 rounded border border-slate-300 text-slate-700 font-bold">&lt;body&gt;</div>
+                                    <div class="grid grid-cols-1 gap-2 p-2 bg-white rounded border border-slate-200">
+                                        <div class="bg-blue-100 p-2 rounded border border-blue-200 text-blue-800 font-semibold">&lt;header&gt;...&lt;/header&gt;</div>
+                                        
+                                        <div class="bg-amber-100 p-3 rounded border border-amber-300 text-amber-900 font-bold relative">
+                                            &lt;article&gt; (אלמנט סמנטי של מאמר)
+                                            <div class="mt-2 bg-red-500 p-3 rounded border border-red-600 text-white font-bold shadow-md animate-pulse">
+                                                ❌ &lt;main&gt; שגיאה קריטית! אסור להיות כאן
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-slate-100 p-2 rounded border border-slate-200 text-slate-600 font-semibold">&lt;footer&gt;...&lt;/footer&gt;</div>
+                                    </div>
+                                    <div class="bg-slate-200 p-1.5 rounded border border-slate-300 text-slate-700 font-bold">&lt;/body&gt;</div>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-red-700 mt-3 leading-relaxed font-semibold"><strong>מדוע הקוד נפסל במבחן?</strong> אלמנט <code>&lt;main&gt;</code> "נבלע" והוגדר כתת-אלמנט (בן) של <code>&lt;article&gt;</code>. דבר זה מהווה עבירה חמורה על תקן HTML5 הסמנטי.</p>
+                        </div>
+                    </div>
+
+                    <!-- Web Application Architecture Diagram -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded uppercase block w-fit mb-3">📡 ארכיטקטורת זרימת נתונים (אפליקציית WEB שלמה)</span>
+                        <h3 class="text-xs font-bold text-slate-700 mb-4">איך ה-Frontend, ה-Backend ובסיס הנתונים מתקשרים (שאלות 11, 19, 20):</h3>
+                        
+                        <div class="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-slate-50 rounded-xl relative">
+                            
+                            <!-- Client / Frontend -->
+                            <div class="bg-white border-2 border-orange-400 rounded-xl p-4 text-center shadow-sm w-full md:w-64 z-10">
+                                <div class="text-orange-500 mb-1 text-base"><i class="fa-solid fa-laptop"></i></div>
+                                <h4 class="font-bold text-slate-900 text-xs">דפדפן הלקוח (Frontend)</h4>
+                                <div class="mt-2 flex justify-center gap-1.5">
+                                    <span class="text-[9px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-bold">HTML</span>
+                                    <span class="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">CSS</span>
+                                    <span class="text-[9px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-bold">JS</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-2">מציג את עץ ה-DOM, שומר Cookies ומבצע פעולות Fetch אסינכרוניות.</p>
+                            </div>
+
+                            <!-- Arrow 1 -->
+                            <div class="flex flex-col items-center justify-center text-slate-400 text-xs font-bold">
+                                <div class="hidden md:block text-indigo-500 text-lg"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+                                <div class="md:hidden text-indigo-500 text-lg"><i class="fa-solid fa-arrow-up-arrow-down"></i></div>
+                                <span class="text-[9px] text-indigo-600 mt-1">בקשת Fetch (טקסט JSON)</span>
+                            </div>
+
+                            <!-- Server / Backend -->
+                            <div class="bg-white border-2 border-blue-500 rounded-xl p-4 text-center shadow-sm w-full md:w-64 z-10">
+                                <div class="text-blue-500 mb-1 text-base"><i class="fa-solid fa-server"></i></div>
+                                <h4 class="font-bold text-slate-900 text-xs">שרת האפליקציה (Backend)</h4>
+                                <div class="mt-2 flex justify-center gap-1.5">
+                                    <span class="text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">Node.js</span>
+                                    <span class="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">Session</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-2">מריץ קוד JS מחוץ לדפדפן, מאבטח מידע, ומנהל זיכרון Session פנימי.</p>
+                            </div>
+
+                            <!-- Arrow 2 -->
+                            <div class="flex flex-col items-center justify-center text-slate-400 text-xs font-bold">
+                                <div class="hidden md:block text-emerald-500 text-lg"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+                                <div class="md:hidden text-emerald-500 text-lg"><i class="fa-solid fa-arrow-up-arrow-down"></i></div>
+                                <span class="text-[9px] text-emerald-600 mt-1">בריכת חיבורים (Pool)</span>
+                            </div>
+
+                            <!-- Database -->
+                            <div class="bg-white border-2 border-emerald-500 rounded-xl p-4 text-center shadow-sm w-full md:w-64 z-10">
+                                <div class="text-emerald-500 mb-1 text-base"><i class="fa-solid fa-database"></i></div>
+                                <h4 class="font-bold text-slate-900 text-xs">בסיס הנתונים (Database)</h4>
+                                <div class="mt-2">
+                                    <span class="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">SQL / Pool</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-2">שומר נתונים קבועים. הגישה אליו מתבצעת אך ורק דרך ה-Backend ולא מהדפדפן!</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUIZ TAB (25 Complete questions) -->
             <div id="tab-content-quiz" class="hidden w-full p-4 md:p-6">
                 <div class="max-w-3xl mx-auto">
                     <div class="bg-gradient-to-r from-rose-500 to-red-600 rounded-xl p-5 text-white mb-6 shadow">
-                        <h2 class="text-lg font-bold mb-1"><i class="fa-solid fa-circle-check mr-1"></i> בוחן מסכם מורחב - סימולציה מלאה של 20 שאלות המבחן</h2>
-                        <p class="text-rose-100 text-xs">כאן אין צורך ב-API Key! תרגול ממוקד של 20 שאלות מדויקות המכסות אחת לאחת את כל נושאי מועד א' של המרצה, כולל השאלות הוויזואליות והמכשילות ביותר.</p>
+                        <h2 class="text-lg font-bold mb-1"><i class="fa-solid fa-circle-check mr-1"></i> בוחן מסכם מורחב - סימולציה מלאה של 25 שאלות</h2>
+                        <p class="text-rose-100 text-xs">תרגול ממוקד של 25 שאלות מורחבות המכסות באופן מלא את רמות הקושי השונות של הקורס ואת מלכודות מועדי א' וב'.</p>
                     </div>
 
                     <!-- Quiz Area Container -->
@@ -225,7 +353,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-slate-800 text-xs">מורה וירטואלי ייעודי למבחן</h3>
-                                <p class="text-[10px] text-emerald-600 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1"></span> מכיר את כל 20 נושאי המיקוד של ירדן</p>
+                                <p class="text-[10px] text-emerald-600 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1"></span> מכיר את כל 25 נושאי המיקוד המורחבים</p>
                             </div>
                         </div>
                         <button onclick="clearChatHistory()" class="text-slate-400 hover:text-red-500 text-xs flex items-center space-x-1 space-x-reverse transition">
@@ -234,22 +362,20 @@
                         </button>
                     </div>
 
-                    <!-- Chat Box Area -->
                     <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/40">
                         <div class="flex space-x-2 space-x-reverse max-w-lg">
                             <div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
                                 <i class="fa-solid fa-robot text-xs"></i>
                             </div>
                             <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100 text-xs">
-                                <p class="leading-relaxed">היי! אני מורה ה-AI האישי שלך. למדתי לעומק את כל 20 המושגים למבחן שלך. שאל אותי שאלות מורכבות, בקש דוגמאות קוד, או שאל על מלכודות ספציפיות שהמרצה אוהב להכשיל עליהן!</p>
+                                <p class="leading-relaxed">היי! אני מורה ה-AI האישי שלך. למדתי לעומק את כל 25 המושגים המורחבים למבחן שלך. שאל אותי שאלות, בקש דוגמאות קוד מלאות או שאל על מלכודות ספציפיות מהמצגות!</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Chat quick buttons -->
                     <div class="p-2 border-t border-slate-100 bg-white flex space-x-2 space-x-reverse overflow-x-auto whitespace-nowrap">
                         <button onclick="sendQuickPrompt('תן לי דוגמה למלכודת המבחן של אלמנט main ב-HTML5')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] px-3 py-1.5 rounded-full transition">מלכודת main ב-HTML5</button>
-                        <button onclick="sendQuickPrompt('למהlet בתוך פונקציה לא מוכר מחוצה לה? תן קוד קצר')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] px-3 py-1.5 rounded-full transition">טווח Let בפונקציות</button>
+                        <button onclick="sendQuickPrompt('למה let בתוך פונקציה לא מוכר מחוצה לה? תן קוד קצר')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] px-3 py-1.5 rounded-full transition">טווח Let בפונקציות</button>
                         <button onclick="sendQuickPrompt('איך נוצר ונמחק Session בשרת במדויק במבחן')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] px-3 py-1.5 rounded-full transition">סשן מול עוגיות בשרת</button>
                     </div>
 
@@ -297,7 +423,6 @@
                     </div>
 
                     <div id="analyzer-output-area" class="mt-4 bg-white rounded-xl border border-slate-200 p-5 shadow-sm hidden">
-                        <!-- Output loaded by JS -->
                     </div>
                 </div>
             </div>
@@ -329,301 +454,209 @@
     <script>
         // Global variables
         let geminiApiKey = localStorage.getItem('gemini_api_key') || "";
-        const fallbackModel = "gemini-3-flash-preview";
+        const fallbackModel = "gemini-1.5-flash";
         let selectedSimulatorTopic = 'html';
 
         // Syllabus Context
         const studyMaterialContext = `
-        HTML: שפת סימון (Markup), לא שפת תכנות. סלחנית לשגיאות, דפדפן יציג דברים גם עם טעויות. לא כל תג פתיחה חייב תג סגירה, לא כל ערך חייב גרשיים. ריבוי רווחים/אנטר מוצגים כרווח אחד.
-        אלמנט DIV: Block, חסר סמנטיקה. סתם קופסה לחלוקה ועיצוב.
-        HTML5: אלמנטים סמנטיים (header, nav, section, article). אלמנט <main> מייצג תוכן ייחודי וראשי, מותר רק אחד בדף ואסור שיהיה תת אלמנט של header, nav, section, article.
-        JSON: פורמט טקסטואלי string להעברת נתונים. משמש בכל השפות. מפתחות וערכים חייבים להיות בגרשיים כפולים "" בלבד! גרש בודד '' לא חוקי. {} אובייקט, [] מערך.
-        Cookies: נשמרות בדפדפן (צד לקוח), מוגבלות בגודל, נשלחות אוטומטית לשרת בכל פנייה.
-        Session: אובייקט בשרת בלבד. נוצר בפנייה הראשונה. שני דפדפנים באותו מחשב = 2 סשנים שונים. נסגר בטיימאאוט או הריסה מפורשת.
-        JS: אינטרפרטציה (שורה-שורה) ולא קומפילציה. let scope מוגבל בתוך פונקציות/בלוקים. const ערך קבוע פעם אחת בלבד. אסור להתחיל משתנה במספר.
-        פונקציות ב-JS: אנונימית ללא שם. Callback היא פונקציה שנשלחת כפרמטר ורצה בתגובה לאירוע.
-        Fetch: שליחת בקשות HTTP לקבלת נתונים ללא רענון הדף. אסינכרונית.
-        Node.js: סביבת הרצה ל-JS מחוץ לדפדפן (צד שרת). משתמשים ב-Pool של חיבורים לבסיס נתונים כי פתיחת חיבור לוקחת זמן.
-        Frontend vs Backend: Frontend בדפדפן (HTML/CSS/JS). Backend בשרת (DB/Logic). בסיסי נתונים תמיד ב-Backend.
+        HTML: שפת סימון (Markup), לא שפת תכנות. סלחנית לשגיאות, דפדפן יציג דברים גם עם טעויות. לא כל תג פתיחה חייב תג סגירה, לא כל ערך חייב גרשיים[cite: 1]. ריבוי רווחים/אנטר מוצגים כרווח אחד[cite: 1].
+        אלמנט DIV: Block, חסר סמנטיקה[cite: 1]. סתם קופסה לחלוקה ועיצוב[cite: 1].
+        HTML5: אלמנטים סמנטיים (header, nav, section, article)[cite: 1]. אלמנט <main> מייצג תוכן ייחודי וראשי, מותר רק אחד בדף ואסור שיהיה תת אלמנט של header, nav, section, article[cite: 1].
+        JSON: פורמט טקסטואלי string להעברת נתונים[cite: 1]. משמש בכל השפות[cite: 1]. מפתחות וערכים חייבים להיות בגרשיים כפולים "" בלבד! גרש בודד '' לא חוקי[cite: 1]. {} אובייקט, [] מערך[cite: 1]. JSON.parse הופך טקסט לאובייקט, JSON.stringify הופך אובייקט לטקסט[cite: 1].
+        Cookies: נשמרות בדפדפן (צד לקוח), מוגבלות בגודל (עד 4KB לכל היותר), נשלחות אוטומטית לשרת בכל פנייה[cite: 1].
+        Session: אובייקט בשרת בלבד[cite: 1]. נוצר בפנייה הראשונה[cite: 1]. שני דפדפנים באותו מחשב = 2 סשנים שונים[cite: 1]. נסגר בטיימאאוט או הריסה מפורשת[cite: 1].
+        JS: אינטרפרטציה (שורה-שורה) ולא קומפילציה[cite: 1]. let scope מוגבל בתוך פונקציות/בלוקים[cite: 1]. const ערך קבוע פעם אחת בלבד[cite: 1]. var בעל scope פונקציונלי בלבד[cite: 1]. אסור להתחיל משתנה במספר[cite: 1].
+        פונקציות ב-JS: אנונימית ללא שם[cite: 1]. Callback היא פונקציה שנשלחת כפרמטר ורצה בתגובה לאירוע[cite: 1].
+        Fetch: שליחת בקשות HTTP לקבלת נתונים ללא רענון הדף[cite: 1]. אסינכרונית, עושה שימוש ב-Promises או async/await[cite: 1].
+        Node.js: סביבת הרצה ל-JS מחוץ לדפדפן (צד שרת)[cite: 1]. משתמשים ב-Pool של חיבורים לבסיס נתונים כי פתיחת חיבור לוקחת זמן[cite: 1].
+        Frontend vs Backend: Frontend בדפדפן (HTML/CSS/JS)[cite: 1]. Backend בשרת (DB/Logic)[cite: 1]. בסיסי נתונים תמיד ב-Backend[cite: 1].
         `;
 
-        // Extended 20 Concepts matching the entire syllabus
+        // Extended 25 Concepts matching the entire syllabus and slides
         const concepts = [
-            { id: 1, category: 'html', title: '1. מהות שפת HTML', desc: 'שפת סימון (Markup), לא שפת תכנות. היא סלחנית מאוד לשגיאות קוד והדפדפן יציג דברים כמיטב יכולתו בכל מקרה.', example: '<img src=1.gif>\n<!-- קוד תקין לגמרי למרות שאין גרשיים ואין תג סגירה! -->', trap: 'המרצה ישאל האם שגיאת קוד באלמנט תגרום לקריסת המסמך. התשובה היא לא! השפה סלחנית לגמרי.' },
-            { id: 2, category: 'html', title: '2. אלמנטים ותגים ב-HTML', desc: 'מסמך HTML מורכב מתגים פנימיים וחיצוניים, תגי קישור פנימיים יכולים לקשר למזהים (id) ספציפיים באותו מסמך.', example: '<a href="#intro">מעבר למבוא</a>\n<section id="intro">מבוא</section>', trap: 'תג קישור <a> יכול לקשר לכתובת אינטרנט חיצונית או לעוגן פנימי באותו דף בעזרת סימן סולמית # וה-id.' },
-            { id: 3, category: 'html', title: '3. אלמנט DIV וחוסר סמנטיקה', desc: 'אלמנט Block המשמש כ"קופסה ריקה" לחלוקת הדף ועיצובו. חסר כל משמעות סמנטית.', example: '<div>\n  <span>תוכן לקבוצה</span>\n</div>', trap: 'המרצה יטען ש-DIV מגדיר בצורה סמנטית פסקאות או פרקים - לא נכון! הוא חסר משמעות סמנטית לגמרי.' },
-            { id: 4, category: 'js', title: '4. שפת התכנות JavaScript', desc: 'שפת תכנות דינמית שעוברת אינטרפרטציה (רצה שורה-שורה בזמן אמת בדפדפן) ולא קומפילציה. נועדה לניהול ממשק המשתמש והדינמיות.', example: '// קוד JS רץ שורה אחר שורה ישירות בדפדפן\nconsole.log("Hello World");', trap: 'המרצה ינסה לטעון ש-JS היא שפת קומפילציה. לא נכון! היא שפת אינטרפרטציה (Interpreted).' },
-            { id: 5, category: 'js', title: '5. משתנים ב-JS חוקים וסוגים', desc: 'לכל משתנה יש סוג נתונים (Type) שנקבע דינמית. אסור להתחיל משתנה במספר. משתמשים במילים השמורות let ו-const.', example: 'let userAge = 25; // תקין\nlet 1user = "Avi"; // לא תקין! אסור להתחיל במספר', trap: 'משתנה שמוגדר עם let בתוך פונקציה חסום בה ואינו מוכר מחוצה לה!' },
-            { id: 6, category: 'js', title: '6. פונקציות ב-JS ופונקציות Callback', desc: 'פונקציה יכולה להיכתב ללא שם (פונקציה אנונימית) ולהישלח כפרמטר (Callback) שיופעל בתגובה לאירוע.', example: 'button.onclick = function() {\n  console.log("הופעל Callback");\n};', trap: 'Callback יכול להיות אנונימי (ללא שם) או פונקציה רגילה בעלת שם מוגדר מראש.' },
-            { id: 7, category: 'data', title: '7. מבנה JSON חוקים ברורים', desc: 'פורמט טקסטואלי (String) להעברת נתונים. חוק הברזל: מפתחות וערכים חייבים להיות עטופים בגרשיים כפולים בלבד ("").', example: '{\n  "status": "success",\n  "code": 200\n}', trap: 'גרש בודד (\') או חוסר גרשיים על המפתחות אינו חוקי ב-JSON!' },
-            { id: 8, category: 'html', title: '8. סמנטיקה ב-HTML5 ואלמנט main', desc: 'אלמנט <main> מייצג את התוכן הראשי הייחודי של המסמך. מותר שיהיה רק אחד כזה, ואסור שיופיע בתוך article, header, nav או section.', example: '<body>\n  <main>\n    <h1>התוכן הייחודי של העמוד</h1>\n  </main>\n</body>', trap: 'חפשו קוד שבו main מופיע פעמיים או נמצא בתוך article - זהו קוד לא תקני!' },
-            { id: 9, category: 'css', title: '9. עיצוב רספונסיבי (Responsive)', desc: 'עיצוב המותאם למגוון מסכים (ניידים ומחשבים). הגישה השלטת היא Mobile First - מעצבים קודם למסך הקטן ביותר ואז למסכים גדולים.', example: '@media (min-width: 768px) {\n  /* קוד עיצוב למסכים גדולים ומעלה */\n}', trap: 'עיצוב רספונסיבי מחייב תמיכה מינימלית בלפחות שני גדלי מסך (נייד ומחשב).' },
-            { id: 10, category: 'data', title: '10. מנגנון ה-Cookies (עוגיות)', desc: 'פיסת מידע קטנה הנשמרת ישירות על מחשב הלקוח (הדפדפן). נקבעת על ידי השרת ונשלחת אליו אוטומטית בכל בקשה מחדש.', example: '// עוגיה נשמרת אצל הלקוח בלבד\ndocument.cookie = "username=Yossi; max-age=3600";', trap: 'המרצה יטען שעוגיות נשמרות בשרת - טעות! הן נשמרות בדפדפן הלקוח.' },
-            { id: 11, category: 'html', title: '11. יישומי Web וכללי הדפדפן', desc: 'יישום העושה שימוש בדפדפן כממשק קצה. הדפדפן יודע להריץ אך ורק 3 שפות: HTML (מבנה), CSS (עיצוב), ו-JavaScript (פעולות).', example: 'Frontend: HTML, CSS, JS\nBackend: Node.js, Python, Databases', trap: 'הדפדפן אינו יודע להריץ ישירות קוד Backend כגון Python או SQL.' },
-            { id: 12, category: 'data', title: '12. שימוש ב-JSON בכל שפה', desc: 'JSON הוא פורמט טקסטואלי גלובלי. משתמשים בו בכל שפות התכנות להעברת מידע, ולא רק ב-JavaScript.', example: '// המרה ב-JS\nlet str = JSON.stringify(obj); // מאובייקט לטקסט\nlet parsed = JSON.parse(str); // מטקסט לאובייקט', trap: 'המרצה יטען ש-stringify הופך טקסט לאובייקט - טעות! הוא הופך אובייקט לטקסט.' },
-            { id: 13, category: 'css', title: '13. מלכודת ה-CSS (השאלה מהתמונה)', desc: 'סלקטור מורכב דורש שכל התנאים יתקיימו. div a[href] פונה רק לקישור עם href שנמצא פיזית בתוך div.', example: 'div a[href] { color: red; }\n\n<!-- <div><a href="">אדום!</a></div> -->\n<!-- <p><a href="">לא אדום</a></p> -->', trap: 'קישור ללא מאפיין href או קישור שמופיע מחוץ ל-div (למשל בתוך פסקה p) לא ייצבע באדום!' },
-            { id: 14, category: 'js', title: '14. עץ ה-DOM הדינמי', desc: 'מבנה נתונים היררכי (עץ) שהדפדפן בונה ממסמך ה-HTML. כל אלמנט הופך לאובייקט ב-JS, ושינוי שלו משנה מיד את מה שרואים על המסך.', example: 'document.getElementById("stam").style.color = "blue";', trap: 'שינויים ב-DOM אינם קבועים בקובץ ה-HTML המקורי בשרת, אלא דינמיים בלבד אצל הלקוח.' },
-            { id: 15, category: 'js', title: '15. מתודת Fetch לתקשורת', desc: 'פונקציה המאפשרת לבקש ולקבל נתונים משרתים לפי כתובת (URL) ללא צורך בריענון או טעינת הדף מחדש.', example: 'fetch(url)\n  .then(res => res.json())\n  .then(data => console.log(data));', trap: 'היא אסינכרונית ומחזירה Promise. היא אינה מרעננת או מחליפה את העמוד הנוכחי.' },
-            { id: 16, category: 'backend', title: '16. סביבת Node.js', desc: 'סביבת הרצה המאפשרת להריץ קוד JavaScript מחוץ לדפדפן (בצד השרת בלבד). משמשת בעיקר לפיתוח Backend.', example: '// app.js רץ בשרת\nconst fs = require("fs");\nconsole.log("רץ בשרת");', trap: 'Node.js אינה שפה חדשה, אלא סביבת הרצה לקוד JS סטנדרטי.' },
-            { id: 17, category: 'data', title: '17. מנגנון ה-Session (סשן)', desc: 'אובייקט זיכרון השמור בשרת בלבד ומזוהה אישית לכל משתמש קצה. נוצר בפנייה הראשונה ונמחק בטיימאאוט או סגירה מפורשת.', example: 'Session: נשמר בשרת (מאובטח)\nCookies: נשמר בדפדפן (פחות מאובטח)', trap: 'שני דפדפנים שונים באותו מחשב (למשל כרום ואדג\') ייצרו שני סשנים שונים לחלוטין בשרת!' },
-            { id: 18, category: 'backend', title: '18. בסיסי נתונים ו-Connection Pool', desc: 'פתיחת חיבור חדש לבסיס הנתונים לוקחת זמן רב. לכן, משתמשים ב-Pool (בריכת חיבורים פתוחים מראש) כדי לייעל את המערכת.', example: 'const pool = mysql.createPool({ connectionLimit: 10 });', trap: 'בשימוש ב-Pool, החיבורים פתוחים מראש ומנוהלים בזיכרון, דבר החוסך זמן תגובה יקר.' },
-            { id: 19, category: 'backend', title: '19. פיתוח ה-Backend ותפקידו', desc: 'צד השרת. אחראי על לוגיקת האפליקציה, אבטחת מידע, שמירה ושליפה של נתונים מבסיסי הנתונים והתאמה אישית למשתמשים.', example: 'Server -> Database (MySQL/MongoDB) -> Client', trap: 'בסיסי נתונים תמיד נמצאים ומנוהלים בצד ה-Backend ולא בצד הלקוח (Frontend).' },
-            { id: 20, category: 'backend', title: '20. אפליקציית WEB שלמה', desc: 'מערכת המשלבת Frontend (HTML/CSS/JS) הרצה בדפדפן הלקוח, ו-Backend (שרת, בסיס נתונים) הרצה בשרת.', example: 'Client Request -> Server Process -> DB -> Server Response', trap: 'הדפדפן תומך אך ורק ב-HTML, CSS ו-JavaScript. שום שרת Backend לא רץ ישירות בדפדפן.' }
+            { id: 1, category: 'html', title: '1. מהות שפת HTML', desc: 'שפת סימון (Markup), לא שפת תכנות[cite: 1]. היא סלחנית מאוד לשגיאות קוד והדפדפן יציג דברים כמיטב יכולתו בכל מקרה[cite: 1].', example: '<img src=1.gif>\n<!-- קוד תקין לגמרי למרות שאין גרשיים ואין תג סגירה! -->[cite: 1]', trap: 'המרצה ישאל האם שגיאת קוד באלמנט תגרום לקריסת המסמך. התשובה היא לא! השפה סלחנית לגמרי[cite: 1].' },
+            { id: 2, category: 'html', title: '2. אלמנטים ותגים ב-HTML', desc: 'מסמך HTML מורכב מתגים פנימיים וחיצוניים[cite: 1]. תגי קישור פנימיים יכולים לקשר למזהים (id) ספציפיים באותו מסמך[cite: 1].', example: '<a href="#intro">מעבר למבוא</a>\n<section id="intro">מבוא</section>[cite: 1]', trap: 'תג קישור <a> יכול לקשר לכתובת אינטרנט חיצונית או לעוגן פנימי באותו דף בעזרת סימן סולמית # וה-id[cite: 1].' },
+            { id: 3, category: 'html', title: '3. אלמנט DIV וחוסר סמנטיקה', desc: 'אלמנט Block המשמש כ"קופסה ריקה" לחלוקת הדף ועיצובו. חסר כל משמעות סמנטית[cite: 1].', example: '<div>\n  <span>תוכן לקבוצה</span>\n</div>[cite: 1]', trap: 'המרצה יטען ש-DIV מגדיר בצורה סמנטית פסקאות או פרקים - לא נכון! הוא חסר משמעות סמנטית לגמרי[cite: 1].' },
+            { id: 4, category: 'js', title: '4. שפת התכנות JavaScript', desc: 'שפת תכנות דינמית שעוברת אינטרפרטציה (רצה שורה-שורה בזמן אמת בדפדפן) ולא קומפילציה[cite: 1]. נועדה לניהול ממשק המשתמש והדינמיות[cite: 1].', example: '// קוד JS רץ שורה אחר שורה ישירות בדפדפן\nconsole.log("Hello World");[cite: 1]', trap: 'המרצה ינסה לטעון ש-JS היא שפת קומפילציה. לא נכון! היא שפת אינטרפרטציה (Interpreted)[cite: 1].' },
+            { id: 5, category: 'js', title: '5. משתנים ב-JS: let מול const', desc: 'משתנים מוגדרים באמצעות let (ניתנים לשינוי) או const (ערך קבוע שאינו ניתן לשינוי לאחר ההשמה הראשונית)[cite: 1]. המילה let נכתבת פעם אחת בלבד בשורת ההגדרה[cite: 1].', example: 'let x = 5;\nx = 10; // תקין לחלוטין\nconst y = 20;\ny = 30; // שגיאה חמורה! לא ניתן לשנות קבוע[cite: 1]', trap: 'השמה מחדש ל-const תגרום לשגיאת קריסה קריטית בזמן ריצה (TypeError)[cite: 1].' },
+            { id: 6, category: 'js', title: '6. משתני var מול let ו-Scope', desc: 'משתני var הם בעלי Scope פונקציונלי (Function Scope) והם עוברים תהליך של Hoisting (הגבהה), בניגוד ל-let ו-const שהם בעלי Scope חסום בבלוק (Block Scope)[cite: 1].', example: 'if (true) {\n    var x = 5;\n    let y = 10;\n}\nconsole.log(x); // ידפיס 5 בהצלחה!\nconsole.log(y); // שגיאה! משתנה let חסום בבלוק התנאי[cite: 1]', trap: 'המרצה יציג לולאה או תנאי עם משתנה let בתוכו, וינסה לגשת אליו מחוץ לבלוק — הדבר יגרום לשגיאה מיידית[cite: 1].' },
+            { id: 7, category: 'js', title: '7. חוקי שמות המשתנים ב-JS', desc: 'אסור להתחיל שם של משתנה במספר[cite: 1]. שמות משתנים יכולים להתחיל באותיות, בסימן דולר ($) או בקו תחתון (_)[cite: 1]. השפה רגישה לאותיות גדולות וקטנות (Case Sensitive)[cite: 1].', example: 'let _user = "Olaf"; // תקין\nlet $price = 100; // תקין\nlet 1item = "Box"; // ❌ שגיאה חמורה![cite: 1]', trap: 'המרצה יציג הגדרת משתנה שמתחילה במספר בתוך קטע קוד וישאל אם הקוד ירוץ. התשובה היא לא, שגיאת סינטקס[cite: 1].' },
+            { id: 8, category: 'js', title: '8. פונקציות ב-JS ופונקציות Callback', desc: 'פונקציה יכולה להיכתב ללא שם (פונקציה אנונימית) ולהישלח כפרמטר (Callback) שיופעל בתגובה לאירוע[cite: 1].', example: 'button.onclick = function() {\n  console.log("הופעל Callback");\n};[cite: 1]', trap: 'Callback יכול להיות אנונימי (ללא שם) או פונקציה רגילה בעלת שם מוגדר מראש[cite: 1].' },
+            { id: 9, category: 'data', title: '9. מבנה JSON חוקים ברורים', desc: 'פורמט טקסטואלי (String) להעברת נתונים. חוק הברזל: מפתחות וערכים חייבים להיות עטופים בגרשיים כפולים בלבד ("")[cite: 1].', example: '{\n  "status": "success",\n  "code": 200\n}[cite: 1]', trap: 'גרש בודד (\') או חוסר גרשיים על המפתחות אינו חוקי ב-JSON![cite: 1]' },
+            { id: 10, category: 'data', title: '10. המרת נתונים: JSON.parse ו-stringify', desc: 'המתודה JSON.stringify הופכת אובייקט בזיכרון למחרוזת טקסט חוקית[cite: 1]. המתודה JSON.parse מקבלת מחרוזת טקסט ומפענחת אותה חזרה לאובייקט JavaScript נגיש[cite: 1].', example: 'let obj = { name: "Olaf" };\nlet jsonStr = JSON.stringify(obj); // "{"name":"Olaf"}"\nlet parsedObj = JSON.parse(jsonStr);[cite: 1]', trap: 'המרצה ינסה לבלבל בין התפקידים ולטעון ש-stringify הופך טקסט לאובייקט. זכור: stringify מייצר מחרוזת (String)[cite: 1].' },
+            { id: 11, category: 'html', title: '11. סמנטיקה ב-HTML5 ואלמנט main', desc: 'אלמנט <main> מייצג את התוכן הראשי הייחודי של המסמך. מותר שיהיה רק אחד כזה, ואסור שיופיע בתוך article, header, nav או section[cite: 1].', example: '<body>\n  <main>\n    <h1>התוכן הייחודי של העמוד</h1>\n  </main>\n</body>[cite: 1]', trap: 'חפשו קוד שבו main מופיע פעמיים או נמצא בתוך article - זהו קוד לא תקני![cite: 1]' },
+            { id: 12, category: 'html', title: '12. אלמנטים סמנטיים: Section מול Article', desc: 'אלמנט <section> מייצג חלוקה נושאית או פרק כללי בתוך המסמך[cite: 1]. אלמנט <article> מייצג פיסת תוכן עצמאית ובלתי תלויה שיכולה לעמוד בפני עצמה (כמו מאמר או פוסט)[cite: 1].', example: '<section>\n    <h2>פרק חדשות ספורט</h2>\n    <article>כתבה על משחק כדורגל</article>\n</section>[cite: 1]', trap: 'אלמנטים אלו נועדו אך ורק לסדר סמנטי ומנועי חיפוש. אין להם שום השפעה ויזואלית או עיצובית מובנית ללא CSS[cite: 1].' },
+            { id: 13, category: 'css', title: '13. עיצוב רספונסיבי (Responsive)', desc: 'עיצוב המותאם למגוון מסכים (ניידים ומחשבים). הגישה השלטת היא Mobile First - מעצבים קודם למסך הקטן ביותר ואז למסכים גדולים[cite: 1].', example: '@media (min-width: 768px) {\n  /* קוד עיצוב למסכים גדולים ומעלה */\n}[cite: 1]', trap: 'עיצוב רספונסיבי מחייב תמיכה מינימלית בלפחות שני גדלי מסך (נייד ומחשב)[cite: 1].' },
+            { id: 14, category: 'data', title: '14. מנגנון ה-Cookies (עוגיות)', desc: 'פיסת מידע קטנה הנשמרת ישירות על מחשב הלקוח (הדפדפן) ומוגבלת בנפח של עד 4KB בלבד[cite: 1]. נשלחת אוטומטית לשרת בכל בקשה מחדש[cite: 1].', example: '// עוגיה נשמרת אצל הלקוח בלבד\ndocument.cookie = "username=Yossi; max-age=3600";[cite: 1]', trap: 'המרצה יטען שעוגיות נשמרות בשרת - טעות! הן נשמרות בדפדפן הלקוח ומוגבלות מאוד בנפחן[cite: 1].' },
+            { id: 15, category: 'html', title: '15. יישומי Web וכללי הדפדפן', desc: 'יישום העושה שימוש בדפדפן כממשק קצה. הדפדפן יודע להריץ אך ורק 3 שפות: HTML (מבנה), CSS (עיצוב), ו-JavaScript (פעולות)[cite: 1].', example: 'Frontend: HTML, CSS, JS\nBackend: Node.js, Python, Databases[cite: 1]', trap: 'הדפדפן אינו יודע להריץ ישירות קוד Backend כגון Python או SQL[cite: 1].' },
+            { id: 16, category: 'data', title: '16. שימוש ב-JSON בכל שפה', desc: 'JSON הוא פורמט טקסטואלי גלובלי. משתמשים בו בכל שפות התכנות להעברת מידע, ולא רק ב-JavaScript[cite: 1].', example: '// ב-Python, ב-Java וב-C# כולם משתמשים בטקסט JSON[cite: 1]', trap: 'JSON הוא גלובלי לחלוטין ומשמש כסטנדרט תעשייתי להעברת מידע בין Frontend ל-Backend[cite: 1].' },
+            { id: 17, category: 'css', title: '17. מלכודת ה-CSS (השאלה מהתמונה)', desc: 'סלקטור מורכב דורש שכל התנאים יתקיימו. div a[href] פונה רק לקישור עם href שנמצא פיזית בתוך div[cite: 1].', example: 'div a[href] { color: red; }\n\n<!-- <div><a href="">אדום!</a></div> -->\n<!-- <p><a href="">לא אדום</a></p> -->[cite: 1]', trap: 'קישור ללא מאפיין href או קישור שמופיע מחוץ ל-div (למשל בתוך פקדה p) לא ייצבע באדום![cite: 1]' },
+            { id: 18, category: 'js', title: '18. עץ ה-DOM הדינמי', desc: 'מבנה נתונים היררכי (עץ) שהדפדפן בונה ממסמך ה-HTML. כל אלמנט הופך לאובייקט ב-JS, ושינוי שלו משנה מיד את מה שרואים על המסך[cite: 1].', example: 'document.getElementById("stam").style.color = "blue";[cite: 1]', trap: 'שינויים ב-DOM אינם קבועים בקובץ ה-HTML המקורי בשרת, אלא דינמיים בלבד אצל הלקוח[cite: 1].' },
+            { id: 19, category: 'js', title: '19. מתודת Fetch לתקשורת אסינכרונית', desc: 'פונקציה המאפשרת לבקש ולקבל נתונים משרתים לפי כתובת (URL) ללא צורך בריענון או טעינת הדף מחדש[cite: 1].', example: 'fetch(url)\n  .then(res => res.json())\n  .then(data => console.log(data));[cite: 1]', trap: 'היא אסינכרונית ומחזירה Promise. היא אינה מרעננת או מחליפה את העמוד הנוכחי[cite: 1].' },
+            { id: 20, category: 'js', title: '20. עבודה אסינכרונית מתקדמת: Async/Await', desc: 'כתיבה מודרנית וקריאה יותר לניהול תהליכים אסינכרוניים (כמו Fetch ברשת) המבוססת על מנגנון ה-Promises ומאפשרת עצירה מדומה של השורה עד לקבלת תשובה.', example: 'async function getData() {\n    let response = await fetch(url);\n    let data = await response.json();\n    console.log(data);\n}', trap: 'לא ניתן להשתמש במילה השמורה await אלא אם כן היא נמצאת בתוך פונקציה שהוגדרה במפורש כ-async!' },
+            { id: 21, category: 'backend', title: '21. סביבת Node.js', desc: 'סביבת הרצה המאפשרת להריץ קוד JavaScript מחוץ לדפדפן (בצד השרת בלבד). משמשת בעיקר לפיתוח Backend[cite: 1].', example: '// app.js רץ בשרת\nconst fs = require("fs");\nconsole.log("רץ בשרת");[cite: 1]', trap: 'Node.js אינה שפה חדשה, אלא סביבת הרצה לקוד JS סטנדרטי[cite: 1].' },
+            { id: 22, category: 'data', title: '22. מנגנון ה-Session (סשן)', desc: 'אובייקט זיכרון השמור בשרת בלבד ומזוהה אישית לכל משתמש קצה. נוצר בפנייה הראשונה ונמחק בטיימאאוט או סגירה מפורשת[cite: 1].', example: 'Session: נשמר בשרת (מאובטח)\nCookies: נשמר בדפדפן (פחות מאובטח)[cite: 1]', trap: 'שני דפדפנים שונים באותו מחשב (למשל כרום ואדג\') ייצרו שני סשנים שונים לחלוטין בשרת![cite: 1]' },
+            { id: 23, category: 'backend', title: '23. בסיסי נתונים ו-Connection Pool', desc: 'פתיחת חיבור חדש לבסיס הנתונים לוקחת זמן רב. לכן, משתמשים ב-Pool (בריכת חיבורים פתוחים מראש) כדי לייעל את המערכת[cite: 1].', example: 'const pool = mysql.createPool({ connectionLimit: 10 });[cite: 1]', trap: 'בשימוש ב-Pool, החיבורים פתוחים מראש ומנוהלים בזיכרון, דבר החוסך זמן תגובה יקר[cite: 1].' },
+            { id: 24, category: 'backend', title: '24. פיתוח ה-Backend ותפקידו', desc: 'צד השרת. אחראי על לוגיקת האפליקציה, אבטחת מידע, שמירה ושליפה של נתונים מבסיסי הנתונים והתאמה אישית למשתמשים[cite: 1].', example: 'Server -> Database (MySQL/MongoDB) -> Client[cite: 1]', trap: 'בסיסי נתונים תמיד נמצאים ומנוהלים בצד ה-Backend ולא בצד הלקוח (Frontend)[cite: 1].' },
+            { id: 25, category: 'backend', title: '25. אפליקציית WEB שלמה', desc: 'מערכת המשלבת Frontend (HTML/CSS/JS) הרצה בדפדפן הלקוח, ו-Backend (שרת, בסיס נתונים) הרצה בשרת[cite: 1].', example: 'Client Request -> Server Process -> DB -> Server Response[cite: 1]', trap: 'הדפדפן תומך אך ורק ב-HTML, CSS ו-JavaScript. שום שרת Backend לא רץ ישירות בדפדפן[cite: 1].' }
         ];
 
         const quizQuestions = [
             {
                 question: "מה נכון בנוגע ל-HTML? (שאלה 1 ממועד א')",
-                options: [
-                    "א. כל תג פתיחה חייב להכיל תג סגירה תואם.",
-                    "ב. אם יש שגיאה באלמנט של HTML המסמך כולו אינו יוצג בדפדפן.",
-                    "ג. לכל מאפיין חייב להיות ערך בגרשיים.",
-                    "ד. HTML אינה מבוססת על XML."
-                ],
+                options: ["א. כל תג פתיחה חייב להכיל תג סגירה תואם.","ב. אם יש שגיאה באלמנט של HTML המסמך כולו אינו יוצג בדפדפן.","ג. לכל מאפיין חייב להיות ערך בגרשיים.","ד. HTML אינה מבוססת על XML."],
                 correctIndex: 3,
-                explanation: "HTML היא שפה סלחנית מאוד שנועדה להציג תוכן בכל מקרה. היא אינה מבוססת על XML, לה יש חוקים נוקשים מאוד (שם הכל חייב להיסגר ולהיות בגרשיים)."
+                explanation: "HTML היא שפה סלחנית מאוד שנועדה להציג תוכן בכל מקרה[cite: 1]. היא אינה מבוססת על XML, לה יש חוקים נוקשים מאוד (שם הכל חייב להיסגר ולהיות בגרשיים)[cite: 1]."
             },
             {
                 question: "קטע הקוד <img src=1.gif> מופיע במסמך HTML. מה נכון בנוגע אליו? (שאלה 2 ממועד א')",
-                options: [
-                    "א. לפי התקן, אפשר להשתמש רק בתמונות מסוג gif.",
-                    "ב. אי אפשר להשתמש באלמנט img בתוך אלמנט div.",
-                    "ג. בקוד יש שגיאה מפני ששם הקובץ אינו בגרשיים.",
-                    "ד. הקוד יהיה תקין גם אם במקום שם הקובץ יהיה URL של תמונה."
-                ],
+                options: ["א. לפי התקן, אפשר להשתמש רק בתמונות מסוג gif.","ב. אי אפשר להשתמש באלמנט img בתוך אלמנט div.","ג. בקוד יש שגיאה מפני ששם הקובץ אינו בגרשיים.","ד. הקוד יהיה תקין גם אם במקום שם הקובץ יהיה URL של תמונה."],
                 correctIndex: 3,
-                explanation: "HTML אינו מחייב גרשיים במקרה זה והקוד תקין לגמרי. כמו כן, ניתן להשתמש בכתובת URL מלאה של תמונה במקום שם קובץ מקומי."
+                explanation: "HTML אינו מחייב גרשיים במקרה זה והקוד תקין לגמרי[cite: 1]. כמו כן, ניתן להשתמש בכתובת URL מלאה של תמונה במקום שם קובץ מקומי[cite: 1]."
             },
             {
                 question: "מה נכון בנוגע למשתנים ב-JavaScript? (שאלה 3 ממועד א')",
-                options: [
-                    "א. שמות של משתנים אפשר להתחיל במספר.",
-                    "ב. למשתנים יש סוג נתונים.",
-                    "ג. אי אפשר להגדיר משתנה בתוך פונקציה.",
-                    "ד. בכל שורה שנותנים ערך למשתנה חייבת להיות מילה שמורה let."
-                ],
+                options: ["א. שמות של משתנים אפשר להתחיל במספר.","ב. למשתנים יש סוג נתונים.","ג. אי אפשר להגדיר משתנה בתוך פונקציה.","ד. בכל שורה שנותנים ערך למשתנה חייבת להיות מילה שמורה let."],
                 correctIndex: 1,
-                explanation: "לכל משתנה ב-JS יש סוג נתונים (מספר, טקסט וכו') שנקבע דינמית. אסור להתחיל משתנה במספר, ומשתמשים ב-let רק בפעם הראשונה שמגדירים אותו."
+                explanation: "לכל משתנה ב-JS יש סוג נתונים (מספר, טקסט וכו') שנקבע דינמית[cite: 1]. אסור להתחיל משתנה במספר, ומשתמשים ב-let רק בפעם הראשונה שמגדירים אותו[cite: 1]."
             },
             {
                 question: "מה נכון בנוגע לשימוש בפונקציות ב-JavaScript? (שאלה 4 ממועד א')",
-                options: [
-                    "א. יכולה להיות פונקציה ללא שם.",
-                    "ב. אם הגדרנו פונקציה חייבים להפעיל אותה במפורש.",
-                    "ג. כל הפונקציות שמשתמשים בהן בדף ספציפי חייבות להיות בקובץ אחד.",
-                    "ד. פרמטרים של פונקציה שנקבעו בעת הגדרתה חייבים לקבל את ערכם בעת הפעלת הפונקציה."
-                ],
+                options: ["א. יכולה להיות פונקציה ללא שם.","ב. אם הגדרנו פונקציה חייבים להפעיל אותה במפורש.","ג. כל הפונקציות שמשתמשים בהן בדף ספציפי חייבות להיות בקובץ אחד.","ד. פרמטרים של פונקציה שנקבעו בעת הגדרתה חייבים לקבל את ערכם בעת הפעלת הפונקציה."],
                 correctIndex: 0,
-                explanation: "ב-JS נפוץ מאוד שימוש בפונקציות אנונימיות (ללא שם), בעיקר עבור פונקציות Callback המועברות לפרמטרים של אירועים."
+                explanation: "ב-JS נפוץ מאוד שימוש בפונקציות אנונימיות (ללא שם), בעיקר עבור פונקציות Callback המועברות לפרמטרים של אירועים[cite: 1]."
             },
             {
                 question: "קטע קוד כלשהו כתוב במסמך HTML. מה נכון בנוגע לו ולאלמנט xxx? (שאלה 2 בסילבוס)",
-                options: [
-                    "א. בתוך אלמנטים שונים לא יכולים להיות אלמנטים אחרים.",
-                    "ב. תג קישור <a> יכול לקשר רק לעמודים חיצוניים.",
-                    "ג. תג קישור <a> יכול לקשר לתוך אותו מסמך HTML בעזרת id פנימי.",
-                    "ד. אלמנטים חייבים להיסגר באותו שורה שבה נפתחו."
-                ],
+                options: ["א. בתוך אלמנטים שונים לא יכולים להיות אלמנטים אחרים.","ב. תג קישור <a> יכול לקשר רק לעמודים חיצוניים.","ג. תג קישור <a> יכול לקשר לתוך אותו מסמך HTML בעזרת id פנימי.","ד. אלמנטים חייבים להיסגר באותו שורה שבה נפתחו."],
                 correctIndex: 2,
-                explanation: "תג קישור <a> יכול לקשר לעוגן/אלמנט פנימי בתוך אותו דף באמצעות שימוש בסימן סולמית # ומזהה ה-id של האלמנט המבוקש."
+                explanation: "תג קישור <a> יכול לקשר לעוגן/אלמנט פנימי בתוך אותו דף באמצעות שימוש בסימן סולמית # ומזהה ה-id של האלמנט המבוקש[cite: 1]."
             },
             {
                 question: "מה נכון בנוגע לאלמנט DIV? (שאלה 3 בסילבוס)",
-                options: [
-                    "א. אלמנט DIV מיועד להגדיר בצורה סמנטית את פרקי המסמך.",
-                    "ב. אלמנט DIV הוא אלמנט Block, חסר סמנטיקה, המשמש לחלוקה ועיצוב.",
-                    "ג. אלמנט DIV חייב להכיל תמיד אלמנט p בתוכו.",
-                    "ד. לא ניתן לשנות את העיצוב של אלמנט DIV ב-CSS."
-                ],
+                options: ["א. אלמנט DIV מיועד להגדיר בצורה סמנטית את פרקי המסמך.","ב. אלמנט DIV הוא אלמנט Block, חסר סמנטיקה, המשמש לחלוקה ועיצוב.","ג. אלמנט DIV חייב להכיל תמיד אלמנט p בתוכו.","ד. לא ניתן לשנות את העיצוב של אלמנט DIV ב-CSS."],
                 correctIndex: 1,
-                explanation: "אלמנט DIV הוא אלמנט Block חסר סמנטיקה לחלוטין. הוא משמש כקופסה ריקה לקבוצת אלמנטים או לצורכי עיצוב ופריסת הדף."
+                explanation: "אלמנט DIV הוא אלמנט Block חסר סמנטיקה לחלוטין[cite: 1]. הוא משמש כקופסה ריקה לקבוצת אלמנטים או לצורכי עיצוב ופריסת הדף[cite: 1]."
             },
             {
                 question: "מה נכון בנוגע לשפת התכנות JavaScript? (שאלה 4 בסילבוס)",
-                options: [
-                    "א. היא שפה שעוברת קומפילציה מלאה מראש.",
-                    "ב. השפה פותחה כדי לנהל את ה-Backend בלבד.",
-                    "ג. היא שפה שעוברת אינטרפרטציה (הקוד רץ שורה אחר שורה בזמן אמת).",
-                    "ד. היא אינה נתמכת על ידי דפדפנים מודרניים."
-                ],
+                options: ["א. היא שפה שעוברת קומפילציה מלאה מראש.","ב. השפה פותחה כדי לנהל את ה-Backend בלבד.","ג. היא שפה שעוברת אינטרפרטציה (הקוד רץ שורה אחר שורה בזמן אמת).","ד. היא אינה נתמכת על ידי דפדפנים מודרניים."],
                 correctIndex: 2,
-                explanation: "JavaScript היא שפת אינטרפרטציה (Interpreted) - הדפדפן קורא ומריץ את הקוד שורה אחר שורה בזמן אמת ללא קומפילציה מוקדמת."
+                explanation: "JavaScript היא שפת אינטרפרטציה (Interpreted) - הדפדפן קורא ומריץ את הקוד שורה אחר שורה בזמן אמת ללא קומפילציה מוקדמת[cite: 1]."
             },
             {
                 question: "הגדרת משתנה עם let בתוך פונקציה. מה נכון בנוגע לטווח ההכרה (Scope) שלו? (שאלה 5 בסילבוס)",
-                options: [
-                    "א. הוא מוכר בכל הקבצים האחרים באפליקציה.",
-                    "ב. הוא מוכר מחוץ לפונקציה בלבד.",
-                    "ג. הוא אינו מוכר מחוץ לפונקציה.",
-                    "ד. הוא הופך אוטומטית למשתנה קבוע (const)."
-                ],
+                options: ["א. הוא מוכר בכל הקבצים האחרים באפליקציה.","ב. הוא מוכר מחוץ לפונקציה בלבד.","ג. הוא אינו מוכר מחוץ לפונקציה.","ד. הוא הופך אוטומטית למשתנה קבוע (const)."],
                 correctIndex: 2,
-                explanation: "משתנה let שהוגדר בתוך פונקציה מוגבל לטווח הפונקציה בלבד (Local Scope), והוא אינו קיים או מוכר מחוצה לה."
+                explanation: "משתנה let שהוגדר בתוך פונקציה מוגבל לטווח הפונקציה בלבד (Local Scope), והוא אינו קיים או מוכר מחוצה לה[cite: 1]."
             },
             {
                 question: "מה נכון בנוגע לפונקציית Callback ב-JavaScript? (שאלה 6 בסילבוס)",
-                options: [
-                    "א. היא חייבת תמיד להכיל שם מוגדר.",
-                    "ב. היא פונקציה המופעלת בתגובה לאירוע אחר במערכת, ויכולה להיות ללא שם.",
-                    "ג. היא יכולה להיכתב רק ב-Node.js.",
-                    "ד. היא רצה מיד עם טעינת הדף, ללא קשר לאירועים."
-                ],
+                options: ["א. היא חייבת תמיד להכיל שם מוגדר.","ב. היא פונקציה המופעלת בתגובה לאירוע אחר במערכת, ויכולה להיות ללא שם.","ג. היא יכולה להיכתב רק ב-Node.js.","ד. היא רצה מיד עם טעינת הדף, ללא קשר לאירועים."],
                 correctIndex: 1,
-                explanation: "פונקציית Callback מועברת כפרמטר ומופעלת בתגובה לאירוע (למשל קליק). היא יכולה להיות אנונימית (ללא שם) או בעלת שם."
+                explanation: "פונקציית Callback מועברת כפרמטר ומופעלת בתגובה לאירוע (למשל קליק)[cite: 1]. היא יכולה להיות אנונימית (ללא שם) או בעלת שם[cite: 1]."
             },
             {
                 question: "איזה חוק הוא חוק ברזל בבניית קוד JSON תקין? (שאלה 7 בסילבוס)",
-                options: [
-                    "א. מותר להשתמש בגרש בודד (') עבור ערכי טקסט.",
-                    "ב. מפתחות וערכים (סוג טקסט) חייבים להיות עטופים בגרשיים כפולים בלבד (\"\").",
-                    "ג. לא ניתן להגדיר מערך בתוך JSON.",
-                    "ד. JSON הוא פורמט שנתמך רק ב-JavaScript."
-                ],
+                options: ["א. מותר להשתמש בגרש בונד (') עבור ערכי טקסט.","ב. מפתחות וערכים (סוג טקסט) חייבים להיות עטופים בגרשיים כפולים בלבד (\"\").","ג. לא ניתן להגדיר מערך בתוך JSON.","ד. JSON הוא פורמט שנתמך רק ב-JavaScript."],
                 correctIndex: 1,
-                explanation: "ב-JSON חובה להשתמש בגרשיים כפולים (\"\") בלבד עבור מפתחות וערכי מחרוזת. גרש בודד (\') הוא שגיאת תחביר חמורה ב-JSON."
+                explanation: "ב-JSON חובה להשתמש בגרשיים כפולים (\"\") בלבד עבור מפתחות וערכי מחרוזת[cite: 1]. גרש בודד (\') הוא שגיאת תחביר חמורה ב-JSON[cite: 1]."
             },
             {
                 question: "מה נכון בנוגע לאלמנט <main> ב-HTML5? (שאלה 8 בסילבוס)",
-                options: [
-                    "א. מותר שיופיע כמה פעמים בדף אחד.",
-                    "ב. מותר שהוא יהיה תת-אלמנט של article או header.",
-                    "ג. מותר שיהיה רק אלמנט <main> אחד ויחיד בדף, והוא אינו יכול להיות צאצא של header או article סמנטי.",
-                    "ד. הוא אלמנט חובה בכל דף HTML, אחרת הדף לא ייטען."
-                ],
+                options: ["א. מותר שיופיע כמה פעמים בדף אחד.","ב. מותר שהוא יהיה תת-אלמנט של article או header.","ג. מותר שיהיה רק אלמנט <main> אחד ויחיד בדף, והוא אינו יכול להיות צאצא של header או article סמנטי.","ד. הוא אלמנט חובה בכל דף HTML, אחרת הדף לא ייטען."],
                 correctIndex: 2,
-                explanation: "ב-HTML5, אלמנט <main> מייצג את התוכן הראשי הייחודי. מותר רק אחד כזה בדף, ואסור שהוא יהיה צאצא של אלמנטים סמנטיים כמו header, nav, section, או article."
+                explanation: "ב-HTML5, אלמנט <main> מייצג את התוכן הראשי הייחודי[cite: 1]. מותר רק אחד כזה בדף, ואסור שהוא יהיה צאצא של אלמנטים סמנטיים כמו header, nav, section, או article[cite: 1]."
             },
             {
                 question: "מה נכון בנוגע לעיצוב רספונסיבי (Responsive Design)? (שאלה 9 בסילבוס)",
-                options: [
-                    "א. תמיד מעצבים קודם כל למסך מחשב גדול, ואז מצמצמים עבור סלולר.",
-                    "ב. גישת 'Mobile First' אומרת שמעצבים קודם כל למסכים הקטנים (סלולר) ואז מתאימים למסכים הגדולים.",
-                    "ג. עיצוב רספונסיבי מונע מהאתר להריץ קוד JavaScript.",
-                    "ד. מספיק לתמוך בגודל מסך אחד בלבד בעיצוב רספונסיבי."
-                ],
+                options: ["א. תמיד מעצבים קודם כל למסך מחשב גדול, ואז מצמצמים עבור סלולר.","ב. גישת 'Mobile First' אומרת שמעצבים קודם כל למסכים הקטנים (סלולר) ואז מתאימים למסכים הגדולים.","ג. עיצוב רספונסיבי מונע מהאתר להריץ קוד JavaScript.","ד. מספיק לתמוך בגודל מסך אחד בלבד בעיצוב רספונסיבי."],
                 correctIndex: 1,
-                explanation: "גישת הברזל המודרנית היא Mobile First - מעצבים תחילה עבור המסך הקטן והמוגבל ביותר, ולאחר מכן משתמשים ב-Media Queries כדי להוסיף חוקי עיצוב והרחבות למסכים גדולים יותר."
+                explanation: "גישת הברזל המודרנית היא Mobile First - מעצבים תחילה עבור המסך הקטן והמוגבל ביותר, ולאחר מכן משתמשים ב-Media Queries כדי להוסיף חוקי עיצוב והרחבות למסכים גדולים יותר[cite: 1]."
             },
             {
                 question: "היכן נשמרות עוגיות (Cookies) של יישום אינטרנט? (שאלה 10 בסילבוס)",
-                options: [
-                    "א. בזיכרון ה-RAM של שרת האפליקציה.",
-                    "ב. בתוך בסיס הנתונים של ה-Backend.",
-                    "ג. על גבי הארד דיסק / דפדפן של מחשב הלקוח.",
-                    "ד. הן נמחקות מיד ברגע שהמשתמש סוגר את הלשונית."
-                ],
+                options: ["א. בזיכרון ה-RAM של שרת האפליקציה.","ב. בתוך בסיס הנתונים של ה-Backend.","ג. על גבי הארד דיסק / דפדפן של מחשב הלקוח.","ד. הן נמחקות מיד ברגע שהמשתמש סוגר את הלשונית."],
                 correctIndex: 2,
-                explanation: "עוגיות נשמרות בדפדפן של המשתמש (צד לקוח), והדפדפן שולח אותן בחזרה לשרת בכל בקשת HTTP מחדש."
+                explanation: "עוגיות נשמרות בדפדפן של המשתמש (צד לקוח), והדפדפן שולח אותן בחזרה לשרת בכל בקשת HTTP מחדש[cite: 1]."
             },
             {
                 question: "בדפדפן האינטרנט של הלקוח (Frontend), באילו שפות הוא מסוגל להשתמש? (שאלה 11 בסילבוס)",
-                options: [
-                    "א. HTML, CSS, JavaScript, ו-SQL.",
-                    "ב. רק ב-HTML ו-CSS.",
-                    "ג. ב-HTML, CSS ו-JavaScript בלבד.",
-                    "ד. בכל שפה כולל Python ו-Node.js במידה והן מותקנות בשרת."
-                ],
+                options: ["א. HTML, CSS, JavaScript, ו-SQL.","ב. רק ב-HTML ו-CSS.","ג. ב-HTML, CSS ו-JavaScript בלבד.","ד. בכל שפה כולל Python ו-Node.js במידה והן מותקנות בשרת."],
                 correctIndex: 2,
-                explanation: "הדפדפן תומך ומריץ אך ורק 3 שפות בצד הלקוח: HTML (למבנה), CSS (לעיצוב), ו-JavaScript (ללוגיקה ודינמיות)."
+                explanation: "הדפדפן תומך ומריץ אך ורק 3 שפות בצד הלקוח: HTML (למבנה), CSS (לעיצוב), ו-JavaScript (ללוגיקה ודינמיות)[cite: 1]."
             },
             {
                 question: "איזה מהבאים אינו תקין בפורמט JSON? (שאלה 12 בסילבוס)",
-                options: [
-                    "א. שימוש בגרשיים כפולים על המפתחות.",
-                    "ב. שימוש בגרש בודד (') לעטיפת מפתחות או ערכים.",
-                    "ג. הגדרת מערך של אובייקטים בתוך סוגריים מרובעים [].",
-                    "ד. שימוש במספרים ללא גרשיים כערכים מספריים."
-                ],
+                options: ["א. שימוש בגרשיים כפולים על המפתחות.","ב. שימוש בגרש בודד (\') לעטיפת מפתחות או ערכים.","ג. הגדרת מערך של אובייקטים בתוך סוגריים מרובעים [].","ד. שימוש במספרים ללא גרשיים כערכים מספריים."],
                 correctIndex: 1,
-                explanation: "שימוש בגרש בודד (') אינו תקני ב-JSON בשום אופן. חובה להשתמש בגרשיים כפולים בלבד (\"\")."
+                explanation: "שימוש בגרש בודד (\') אינו תקני ב-JSON בשום אופן[cite: 1]. חובה להשתמש בגרשיים כפולים בלבד (\"\")[cite: 1]."
             },
             {
                 question: "על פי הגדרת ה-CSS הבאה: div a[href] { color: red; } איזה קוד HTML ייצבע באדום? (שאלה 13 בסילבוס - מהתמונה)",
-                options: [
-                    "א. <div>test <a id='h1'>stam</a></div>",
-                    "ב. <p><a href=''>stam</a></p>",
-                    "ג. <div>test <a href=''>stam</a></div>",
-                    "ד. כל האלמנטים המכילים את המילה stam."
-                ],
+                options: ["א. <div>test <a id='h1'>stam</a></div>","ב. <p><a href=''>stam</a></p>","ג. <div>test <a href=''>stam</a></div>","ד. כל האלמנטים המכילים את המילה stam."],
                 correctIndex: 2,
-                explanation: "הסלקטור דורש שני דברים: שהקישור <a> יהיה בתוך <div> ושתהיה לו תכונת href. רק אופציה ג' עונה על שני התנאים."
+                explanation: "הסלקטור דורש שני דברים: שהקישור <a> יהיה בתוך <div> ושתהיה לו תכונת href[cite: 1]. רק אופציה ג' עונה על שני התנאים[cite: 1]."
             },
             {
                 question: "מהו עץ ה-DOM? (שאלה 14 בסילבוס)",
-                options: [
-                    "א. בסיס נתונים לשמירת נתונים בשרת.",
-                    "ב. מבנה נתונים היררכי בזיכרון הדפדפן המייצג את מסמך ה-HTML, וכל שינוי בו משנה מיד את המוצג על המסך.",
-                    "ג. פרוטוקול אבטחה להעברת קבצים.",
-                    "ד. מנוע ההרצה של Node.js."
-                ],
+                options: ["א. בסיס נתונים לשמירת נתונים בשרת.","ב. מבנה נתונים היררכי בזיכרון הדפדפן המייצג את מסמך ה-HTML, וכל שינוי בו משנה מיד את המוצג על המסך.","ג. פרוטוקול אבטחה להעברת קבצים.","ד. מנוע ההרצה של Node.js."],
                 correctIndex: 1,
-                explanation: "DOM הוא עץ היררכי שנבנה מה-HTML. כל שינוי של אובייקט בעץ זה באמצעות JS משנה באופן מיידי ודינמי את התצוגה הוויזואלית למשתמש."
+                explanation: "DOM הוא עץ היררכי שנבנה מה-HTML[cite: 1]. כל שינוי של אובייקט בעץ זה באמצעות JS משנה באופן מיידי ודינמי את התצוגה הוויזואלית למשתמש[cite: 1]."
             },
             {
                 question: "מהו תפקידה של מתודת fetch ב-JavaScript? (שאלה 15 בסילבוס)",
-                options: [
-                    "א. לרענן את כל הדף הנוכחי על מנת לעדכן נתונים.",
-                    "ב. לבקש ולקבל נתונים מהשרת באופן אסינכרוני, ללא צורך בריענון או טעינת הדף מחדש.",
-                    "ג. לשנות את סגנון ה-CSS של הדף.",
-                    "ד. למחוק את העוגיות (Cookies) של המשתמש."
-                ],
+                options: ["א. לרענן את כל הדף הנוכחי על מנת לעדכן נתונים.","ב. לבקש ולקבל נתונים מהשרת באופן אסינכרוני, ללא צורך בריענון או טעינת הדף מחדש.","ג. לשנות את סגנון ה-CSS של הדף.","ד. למחוק את העוגיות (Cookies) של המשתמש."],
                 correctIndex: 1,
-                explanation: "fetch שולחת בקשות HTTP אסינכרוניות לקבלת נתונים מהשרת (בפורמט JSON לרוב), ומאפשרת לעדכן את הדף דינמית ללא ריענון."
+                explanation: "fetch שולחת בקשות HTTP אסינכרוניות לקבלת נתונים מהשרת (בפורמט JSON לרוב), ומאפשרת לעדכן את הדף דינמית ללא ריענון[cite: 1]."
             },
             {
                 question: "מה נכון לגבי Node.js? (שאלה 16 בסילבוס)",
-                options: [
-                    "א. היא שפת תכנות חדשה לחלוטין שהחליפה את JavaScript.",
-                    "ב. היא סביבת הרצה המאפשרת להריץ קוד JavaScript מחוץ לדפדפן (בצד השרת).",
-                    "ג. היא תוסף לדפדפן כרום שמאיץ טעינת אתרים.",
-                    "ד. היא משמשת לעיצוב רספונסיבי בלבד."
-                ],
+                options: ["א. היא שפת תכנות חדשה לחלוטין שהחליפה את JavaScript.","ב. היא סביבת הרצה המאפשרת להריץ קוד JavaScript מחוץ לדפדפן (בצד השרת).","ג. היא תוסף לדפדפן כרום שמאיץ טעינת אתרים.","ד. היא משמשת לעיצוב רספונסיבי בלבד."],
                 correctIndex: 1,
-                explanation: "Node.js היא סביבת הרצה (Runtime Environment) המאפשרת להריץ קוד JS בצד השרת, מחוץ לגבולות הדפדפן."
+                explanation: "Node.js היא סביבת הרצה (Runtime Environment) המאפשרת להריץ קוד JS בצד השרת, מחוץ לגבולות הדפדפן[cite: 1]."
             },
             {
                 question: "מה נכון בנוגע ל-Session (סשן)? (שאלה 17 בסילבוס)",
-                options: [
-                    "א. הוא אובייקט זיכרון שנשמר במחשב הלקוח.",
-                    "ב. הוא אובייקט זיכרון השמור בשרת, והוא נוצר אוטומטית בפנייה הראשונה של המשתמש.",
-                    "ג. אם נפתח שני דפדפנים שונים באותו מחשב מול אותו שרת, נשתמש באותו סשן בדיוק.",
-                    "ד. סשן נשאר פעיל לנצח ואינו יכול להימחק על ידי טיימאאוט."
-                ],
+                options: ["א. הוא אובייקט זיכרון שנשמר במחשב הלקוח.","ב. הוא אובייקט זיכרון השמור בשרת, והוא נוצר אוטומטית בפנייה הראשונה של המשתמש.","ג. אם נפתח שני דפדפנים שונים באותו מחשב מול אותו שרת, נשתמש באותו סשן בדיוק.","ד. סשן נשאר פעיל לנצח ואינו יכול להימחק על ידי טיימאאוט."],
                 correctIndex: 1,
-                explanation: "סשן נשמר בשרת בלבד. שני דפדפנים שונים באותו מחשב ייצרו שני סשנים שונים בשרת. הוא נמחק בטיימאאוט או בהריסה מפורשת."
+                explanation: "סשן נשמר בשרת בלבד[cite: 1]. שני דפדפנים שונים באותו מחשב ייצרו שני סשנים שונים בשרת[cite: 1]. הוא נמחק בטיימאאוט או בהריסה מפורשת[cite: 1]."
             },
             {
                 question: "מדוע משתמשים ב-Connection Pool בעבודה מול בסיסי נתונים ב-Node.js? (שאלה 18 בסילבוס)",
-                options: [
-                    "א. מכיוון ש-Node.js אינו תומך בחיבור בודד.",
-                    "ב. פתיחה של חיבור (Connection) חדש לוקחת זמן יקר, ולכן עדיף להחזיק בריכת חיבורים פתוחים ומוכנים מראש.",
-                    "ג. ה-Pool דרוש כדי לתרגם את קוד ה-JS לשפת SQL.",
-                    "ד. כדי לאפשר גישה ישירה של הלקוח (Frontend) לבסיס הנתונים."
-                ],
+                options: ["א. מכיוון ש-Node.js אינו תומך בחיבור בודד.","ב. פתיחה של חיבור (Connection) חדש לוקחת זמן רב, ולכן עדיף להחזיק בריכת חיבורים פתוחים ומוכנים מראש.","ג. ה-Pool דרוש כדי לתרגם את קוד ה-JS לשפת SQL.","ד. כדי לאפשר גישה ישירה של הלקוח (Frontend) לבסיס הנתונים."],
                 correctIndex: 1,
-                explanation: "פתיחת חיבור חדש מול בסיס נתונים היא פעולה איטית המאטה את האפליקציה. Connection Pool פותר זאת על ידי החזקת קבוצת חיבורים פתוחים ומוכנים לשימוש חוזר."
+                explanation: "פתיחת חיבור חדש מול בסיס נתונים היא פעולה איטית המאטה את האפליקציה[cite: 1]. Connection Pool פותר זאת על ידי החזקת קבוצת חיבורים פתוחים ומוכנים לשימוש חוזר[cite: 1]."
             },
             {
                 question: "מה נכון בנוגע לפיתוח Backend? (שאלה 19 בסילבוס)",
-                options: [
-                    "א. מטרתו היחידה היא לעצב את כפתורי האתר.",
-                    "ב. הוא מתבצע כולו בתוך דפדפן המשתמש.",
-                    "ג. הוא מנהל את הלוגיקה, האבטחה, השרת ובסיסי הנתונים.",
-                    "ד. בסיסי נתונים תמיד מנוהלים בצד ה-Frontend ולא ב-Backend."
-                ],
+                options: ["א. מטרתו היחידה היא לעצב את כפתורי האתר.","ב. הוא מתבצע כולו בתוך דפדפן המשתמש.","ג. הוא מנהל את הלוגיקה, האבטחה, השרת ובסיסי הנתונים.","ד. בסיסי נתונים תמיד מנוהלים בצד ה-Frontend ולא ב-Backend."],
                 correctIndex: 2,
-                explanation: "ה-Backend אחראי על צד השרת, לוגיקת האפליקציה, אבטחת מידע, אינטראקציה עם בסיסי הנתונים וניהול המידע הנסתר מהמשתמש."
+                explanation: "ה-Backend אחראי על צד השרת, לוגיקת האפליקציה, אבטחת מידע, אינטראקציה עם בסיסי הנתונים וניהול המידע הנסתר מהמשתמש[cite: 1]."
             },
             {
                 question: "מה נכון לגבי אפליקציית WEB שלמה? (שאלה 20 בסילבוס)",
-                options: [
-                    "א. היא רצה כולה בשרת ואינה דורשת דפדפן.",
-                    "ב. היא משלבת Frontend הרץ בדפדפן הלקוח ו-Backend הרץ בשרת.",
-                    "ג. קוד ה-Backend (שרת, DB) רץ ישירות בתוך הדפדפן.",
-                    "ד. היא אינה עושה שימוש ב-JavaScript."
-                ],
+                options: ["א. היא רצה כולה בשרת ואינה דורשת דפדפן.","ב. היא משלבת Frontend הרץ בדפדפן הלקוח ו-Backend הרץ בשרת.","ג. קוד ה-Backend (שרת, DB) רץ ישירות בתוך הדפדפן.","ד. היא אינה עושה שימוש ב-JavaScript."],
                 correctIndex: 1,
-                explanation: "אפליקציית ווב מודרנית משלבת שני חלקים עיקריים: ה-Frontend (צד לקוח) המציג את ממשק המשתמש בדפדפן, וה-Backend (צד שרת) המנהל את המידע מאחורי הקלעים."
+                explanation: "אפליקציית ווב מודרנית משלבת שני חלקים עיקריים: ה-Frontend (צד לקוח) המציג את ממשק המשתמש בדפדפן, וה-Backend (צד שרת) המנהל את המידע מאחורי הקלעים[cite: 1]."
+            },
+            {
+                question: "מה קורה כאשר מנסים לבצע השמה מחדש למשתנה שהוגדר כ-const ב-JavaScript? (מתוך מצגות הקורס)",
+                options: ["א. המשתנה ישתנה בהצלחה ללא שום בעיה.","ב. המשתנה ישנה את סוג הנתונים שלו ל-let באופן אוטומטי.","ג. תתרחש שגיאת קריסה חמורה מסוג TypeError בזמן הריצה.","ד. הדפדפן יתעלם מהשורה וימשיך להריץ את הקוד."],
+                correctIndex: 2,
+                explanation: "קבוע (const) לא ניתן לשינוי לאחר ההשמה הראשונית שלו. ניסיון לדרוס את ערכו יגרום מיידית לשגיאת TypeError."
+            },
+            {
+                question: "מהו ההבדל המרכזי בין שימוש ב-JSON.parse לבין JSON.stringify? (מתוך מצגות הקורס)",
+                options: ["א. parse הופך אובייקט למחרוזת טקסט, ו-stringify הופך טקסט לאובייקט.","ב. parse משמש לעיצוב רספונסיבי, ו-stringify משמש לתקשורת שרת.","ג. stringify הופך אובייקט למחרוזת טקסט (String), ו-parse מפענח מחרוזת טקסט חזרה לאובייקט.","ד. שניהם מבצעים בדיוק את אותה הפעולה מבחינת הדפדפן."],
+                correctIndex: 2,
+                explanation: "stringify מייצר מחרוזת טקסט (String) מאובייקט זיכרון, בעוד parse קורא את מחרוזת הטקסט וממיר אותה חזרה לאובייקט תקין ב-JS."
+            },
+            {
+                question: "מהו חוק האחסון הרשמי של מנגנון ה-Cookies בדפדפן? (מתוך מצגות הקורס)",
+                options: ["א. הן יכולות להכיל נפח בלתי מוגבל של מידע על השרת.","ב. הן מוגבלות מאוד בנפחן (עד 4KB לכל היותר לכל עוגייה) ונשמרות בצד הלקוח.","ג. הן נשמרות בתוך ה-Connection Pool של בסיס הנתונים.","ד. הן נמחקות מהמחשב ברגע שיש ניתוק קצר מהאינטרנט."],
+                correctIndex: 1,
+                explanation: "עוגיות מוגבלות מאוד בנפח האחסון שלהן (עד 4KB לעוגייה) ונשמרות פיזית על גבי מחשב הלקוח ולא בשרת."
             }
         ];
 
@@ -652,10 +685,47 @@
                     plugins: { legend: { display: false } }
                 }
             });
+
+            const ctx2 = document.getElementById('storageChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['עוגיות (צד לקוח)', 'סשן (צד שרת)'],
+                    datasets: [{
+                        label: 'נפח אחסון מקסימלי חזותי',
+                        data: [4, 5000],
+                        backgroundColor: ['#ef4444', '#22c55e'],
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, display: false } }
+                }
+            });
+
+            const ctx3 = document.getElementById('dbAccessChart').getContext('2d');
+            new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['חיבור ישיר רגיל', 'שימוש ב-Pool'],
+                    datasets: [{
+                        label: 'זמן תגובה במילישניות (נמוך יותר טוב)',
+                        data: [180, 5],
+                        backgroundColor: ['#f59e0b', '#3b82f6'],
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
         }
 
         function switchTab(tabId) {
             document.getElementById('tab-content-study').classList.add('hidden');
+            document.getElementById('tab-content-visual').classList.add('hidden');
             document.getElementById('tab-content-quiz').classList.add('hidden');
             document.getElementById('tab-content-simulator').classList.add('hidden');
             document.getElementById('tab-content-tutor').classList.add('hidden');
@@ -696,7 +766,6 @@
                 const card = document.createElement('div');
                 card.className = 'concept-card bg-white p-5 rounded-xl border border-slate-200 flex flex-col h-full shadow-sm';
                 
-                // Add highlight for gold gift questions (1 to 4)
                 const isGift = c.id <= 4;
                 const giftBadge = isGift ? `<span class="text-[10px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 uppercase font-bold flex items-center gap-1"><i class="fa-solid fa-gift"></i> שאלת מתנה מובטחת!</span>` : '';
 
@@ -728,7 +797,6 @@
                 btn.classList.add('text-slate-600', 'hover:bg-slate-100');
             });
             
-            // Find active button and update style
             const activeBtn = Array.from(document.querySelectorAll('.sidebar-item')).find(btn => 
                 btn.getAttribute('onclick').includes(`'${cat}'`)
             );
@@ -880,7 +948,7 @@
 
             if (percent >= 90) {
                 feedbackTitle = "עברת בציון מצוין! 🏆";
-                feedbackDesc = "הבנת מעולה את כל 20 השאלות והמלכודות של המרצה. אתה מוכן לחלוטין למבחן ללא חומר עזר!";
+                feedbackDesc = "הבנת מעולה את כל השאלות והמלכודות של המרצה. אתה מוכן לחלוטין למבחן ללא חומר עזר!";
                 feedbackColor = "text-emerald-600";
             } else if (percent >= 70) {
                 feedbackTitle = "עברת! ציון טוב מאוד 👍";
@@ -888,7 +956,7 @@
                 feedbackColor = "text-indigo-600";
             } else {
                 feedbackTitle = "נדרש מעבר נוסף על החומר! 📚";
-                feedbackDesc = "אל דאגה, בדיוק בשביל זה הסימולטור כאן. קרא שוב את 20 כרטיסיות הלמידה הממוקדות ונסה שוב. אתה תצליח!";
+                feedbackDesc = "אל דאגה, בדיוק בשביל זה הסימולטור כאן. קרא שוב את כרטיסיות הלמידה הממוקדות ונסה שוב. אתה תצליח!";
                 feedbackColor = "text-rose-600";
             }
 
@@ -899,7 +967,7 @@
                     
                     <div class="inline-block bg-slate-50 border border-slate-100 rounded-xl px-6 py-3 mb-4">
                         <span class="block text-3xl font-extrabold ${feedbackColor}">${quizScore} / ${quizQuestions.length}</span>
-                        <span class="text-xs font-semibold text-slate-500">ציון: ${percent}%</span>
+                        <span class="text-xs font-semibold text-slate-500">ציון: ${percent.toFixed(1)}%</span>
                     </div>
 
                     <h4 class="font-bold text-sm ${feedbackColor} mb-2">${feedbackTitle}</h4>
@@ -1004,7 +1072,7 @@
                 "ג. כאן מסיח ג",
                 "ד. כאן מסיח ד"
               ],
-              "correctIndex": 0, // אינדקס התשובה הנכונה מ-0 עד 3
+              "correctIndex": 0,
               "explanation": "הסבר מפורט ביותר בעברית מדוע זו התשובה הנכונה, ומהי המלכודת שהייתה בשאלה שמכשילה סטודנטים."
             }
             `;
