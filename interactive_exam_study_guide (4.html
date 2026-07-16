@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מרכז למידה וסימולטור AI למבחן פיתוח אינטרנט</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .concept-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .concept-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-item.active {
+            background-color: #3b82f6;
+            color: #ffffff !important;
+            border-right: 4px solid #1d4ed8;
+        }
+
+        .tab-btn.active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+    <div class="min-h-screen flex flex-col">
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <i class="fa-solid fa-graduation-cap text-blue-600 text-3xl animate-bounce"></i>
+                    <div>
+                        <h1 class="text-lg md:text-xl font-bold text-slate-900">מפצח המבחנים: פיתוח יישומי אינטרנט</h1>
+                        <p class="text-[10px] text-slate-500">מיקוד מושלם ל-20 שאלות המבחן על בסיס הסיכום של ירדן</p>
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation tabs -->
+                <div class="hidden lg:flex space-x-6 space-x-reverse text-sm font-semibold">
+                    <button onclick="switchTab('study')" class="tab-btn active py-5 px-1" id="tab-study">כרטיסיות למידה (20 מושגים)</button>
+                    <button onclick="switchTab('quiz')" class="tab-btn py-5 px-1" id="tab-quiz">
+                        <i class="fa-solid fa-list-check text-rose-500 ml-1"></i> בוחן מסכם (20 שאלות)
+                    </button>
+                    <button onclick="switchTab('simulator')" class="tab-btn py-5 px-1" id="tab-simulator">
+                        <i class="fa-solid fa-laptop-code text-indigo-500 ml-1"></i> סימולטור שאלות AI
+                    </button>
+                    <button onclick="switchTab('tutor')" class="tab-btn py-5 px-1" id="tab-tutor">
+                        <i class="fa-solid fa-robot text-emerald-500 ml-1"></i> מורה וירטואלי AI
+                    </button>
+                    <button onclick="switchTab('analyzer')" class="tab-btn py-5 px-1" id="tab-analyzer">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-500 ml-1"></i> מנתח קוד ומלכודות
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <button onclick="toggleSettingsModal()" class="text-slate-500 hover:text-blue-600 p-2 rounded-full hover:bg-slate-100 transition" title="הגדרות Gemini API">
+                        <i class="fa-solid fa-gear text-lg"></i>
+                    </button>
+                    <div class="relative w-36 md:w-48" id="searchContainer">
+                        <input type="text" id="searchInput" onkeyup="filterConcepts()" placeholder="חפש מושג/שאלה..." class="w-full pl-4 pr-8 py-1.5 border border-slate-300 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-slate-400 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile Horizontal Navigation Tabs -->
+            <div class="flex lg:hidden border-t border-slate-100 bg-slate-50 overflow-x-auto whitespace-nowrap text-xs font-semibold px-2 py-1.5">
+                <button onclick="switchTab('study')" class="tab-btn-mobile px-3 py-1.5 text-slate-700 rounded-full ml-1" id="tab-m-study">כרטיסיות</button>
+                <button onclick="switchTab('quiz')" class="tab-btn-mobile px-3 py-1.5 text-slate-700 rounded-full ml-1" id="tab-m-quiz">בוחן מסכם</button>
+                <button onclick="switchTab('simulator')" class="tab-btn-mobile px-3 py-1.5 text-slate-700 rounded-full ml-1" id="tab-m-simulator">סימולטור AI</button>
+                <button onclick="switchTab('tutor')" class="tab-btn-mobile px-3 py-1.5 text-slate-700 rounded-full ml-1" id="tab-m-tutor">מורה AI</button>
+                <button onclick="switchTab('analyzer')" class="tab-btn-mobile px-3 py-1.5 text-slate-700 rounded-full" id="tab-m-analyzer">מנתח קוד</button>
+            </div>
+        </header>
+
+        <div class="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full">
+            
+            <!-- STUDY TAB -->
+            <div id="tab-content-study" class="w-full flex flex-col lg:flex-row">
+                <!-- Sidebar filter -->
+                <aside class="w-full lg:w-64 bg-slate-50 border-l border-slate-200 p-4 shrink-0">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">סינון קטגוריה</h3>
+                    <nav class="space-y-1" id="categoryNav">
+                        <button onclick="setCategory('all')" class="sidebar-item active w-full text-right px-3 py-2 rounded-lg text-xs font-semibold transition-all">הכל (20 המושגים למבחן)</button>
+                        <button onclick="setCategory('html')" class="sidebar-item w-full text-right px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">HTML / HTML5 סמנטי</button>
+                        <button onclick="setCategory('css')" class="sidebar-item w-full text-right px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">CSS & סלקטורים</button>
+                        <button onclick="setCategory('js')" class="sidebar-item w-full text-right px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">JavaScript & DOM</button>
+                        <button onclick="setCategory('backend')" class="sidebar-item w-full text-right px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">Node.js, DB & Backend</button>
+                        <button onclick="setCategory('data')" class="sidebar-item w-full text-right px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">JSON, Cookies & Session</button>
+                    </nav>
+
+                    <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <p class="text-xs text-blue-900 font-semibold mb-2">חלוקת שפות הדפדפן (Frontend):</p>
+                        <div class="h-28">
+                            <canvas id="browserLangsChart"></canvas>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Concepts Core Grid -->
+                <main class="flex-1 p-4 md:p-6 overflow-y-auto">
+                    <section id="intro" class="mb-6 bg-blue-600 text-white rounded-xl p-5 shadow">
+                        <h2 class="text-xl font-bold mb-2">מרכז למידה ממוקד ומפצח - ללא חומר עזר!</h2>
+                        <p class="text-xs text-blue-100 leading-relaxed">
+                            המבחן מכיל בדיוק את 20 השאלות המופיעות פה. 4 שאלות מתוכן הן שאלות מתנה זהות לחלוטין לקובץ הדוגמה (מסומנות בתווית זהב). שאר 16 השאלות יתבססו על הדגשים, קטעי הקוד ומלכודות המרצה המפורטות להלן.
+                        </p>
+                    </section>
+
+                    <section id="cssPlayground" class="mb-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center space-x-2 space-x-reverse mb-3">
+                            <i class="fa-solid fa-eye text-blue-500"></i>
+                            <h3 class="text-sm font-bold text-slate-800">הדמיה ויזואלית: מלכודת ה-CSS (שאלה 13)</h3>
+                        </div>
+                        <div class="bg-slate-900 text-slate-100 p-3 rounded-lg font-mono text-xs mb-3 dir-ltr text-left">
+                            div a[href] { color: red; }
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="border p-3 rounded-lg bg-slate-50 text-center">
+                                <div class="text-[10px] text-slate-400 mb-1">קוד HTML תואם</div>
+                                <code class="text-xs block bg-white p-1 rounded border mb-2 dir-ltr text-left">&lt;div&gt;&lt;a href=""&gt;stam&lt;/a&gt;&lt;/div&gt;</code>
+                                <span class="text-red-600 font-bold text-sm">stam (באדום!)</span>
+                            </div>
+                            <div class="border p-3 rounded-lg bg-slate-50 text-center">
+                                <div class="text-[10px] text-slate-400 mb-1">מלכודת 1: אין href</div>
+                                <code class="text-xs block bg-white p-1 rounded border mb-2 dir-ltr text-left">&lt;div&gt;&lt;a id="h1"&gt;stam&lt;/a&gt;&lt;/div&gt;</code>
+                                <span class="text-slate-800 font-semibold text-sm">stam (לא באדום)</span>
+                            </div>
+                            <div class="border p-3 rounded-lg bg-slate-50 text-center">
+                                <div class="text-[10px] text-slate-400 mb-1">מלכודת 2: בתוך P</div>
+                                <code class="text-xs block bg-white p-1 rounded border mb-2 dir-ltr text-left">&lt;p&gt;&lt;a href=""&gt;stam&lt;/a&gt;&lt;/p&gt;</code>
+                                <span class="text-slate-800 font-semibold text-sm">stam (לא באדום)</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Concept cards container -->
+                    <div id="conceptsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Populated dynamically via javascript -->
+                    </div>
+                </main>
+            </div>
+
+            <!-- QUIZ TAB (20 Complete questions) -->
+            <div id="tab-content-quiz" class="hidden w-full p-4 md:p-6">
+                <div class="max-w-3xl mx-auto">
+                    <div class="bg-gradient-to-r from-rose-500 to-red-600 rounded-xl p-5 text-white mb-6 shadow">
+                        <h2 class="text-lg font-bold mb-1"><i class="fa-solid fa-circle-check mr-1"></i> בוחן מסכם מורחב - סימולציה מלאה של 20 שאלות המבחן</h2>
+                        <p class="text-rose-100 text-xs">כאן אין צורך ב-API Key! תרגול ממוקד של 20 שאלות מדויקות המכסות אחת לאחת את כל נושאי מועד א' של המרצה, כולל השאלות הוויזואליות והמכשילות ביותר.</p>
+                    </div>
+
+                    <!-- Quiz Area Container -->
+                    <div id="quiz-wrapper" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm min-h-[380px] flex flex-col justify-between">
+                        <!-- Content loaded dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI SIMULATOR TAB -->
+            <div id="tab-content-simulator" class="hidden w-full p-4 md:p-6">
+                <div class="max-w-3xl mx-auto">
+                    <div class="bg-gradient-to-r from-indigo-500 to-indigo-700 rounded-xl p-5 text-white mb-6 shadow">
+                        <h2 class="text-lg font-bold mb-1"><i class="fa-solid fa-robot mr-1"></i> מחולל שאלות מונחה Gemini AI</h2>
+                        <p class="text-indigo-100 text-xs">השתמש בבינה מלאכותית של גוגל על מנת לייצר שאלות תרגול בלתי מוגבלות. המודל מכוון לחקות בדיוק את המלכודות וסגנון המרצה.</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 p-5 mb-5 shadow-sm">
+                        <label class="block text-xs font-bold text-slate-700 mb-2">בחר קטגוריה ליצירת שאלה ייחודית:</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+                            <button onclick="selectSimTopic('html')" class="sim-topic-btn bg-slate-100 hover:bg-slate-200 py-2 px-1 rounded text-[11px] font-semibold text-slate-700 border border-transparent transition" id="topic-html">HTML5 ו-main</button>
+                            <button onclick="selectSimTopic('js')" class="sim-topic-btn bg-slate-100 hover:bg-slate-200 py-2 px-1 rounded text-[11px] font-semibold text-slate-700 border border-transparent transition" id="topic-js">משתני JS וטווח הכרה</button>
+                            <button onclick="selectSimTopic('session')" class="sim-topic-btn bg-slate-100 hover:bg-slate-200 py-2 px-1 rounded text-[11px] font-semibold text-slate-700 border border-transparent transition" id="topic-session">Cookies ו-Session</button>
+                            <button onclick="selectSimTopic('json')" class="sim-topic-btn bg-slate-100 hover:bg-slate-200 py-2 px-1 rounded text-[11px] font-semibold text-slate-700 border border-transparent transition" id="topic-json">JSON ו-Connection Pool</button>
+                        </div>
+                        <button onclick="generateAIQuestion()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm flex items-center justify-center space-x-2 space-x-reverse transition">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>חולל שאלת מבחן חדשה</span>
+                        </button>
+                    </div>
+
+                    <div id="simulator-interactive-area" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm min-h-[220px] flex flex-col justify-center items-center">
+                        <div class="text-center text-slate-400 py-6">
+                            <i class="fa-solid fa-circle-question text-3xl mb-2 text-indigo-200"></i>
+                            <p class="text-xs">בחר נושא למעלה ולחץ על "חולל שאלת מבחן חדשה" כדי להתחיל בתרגול דינמי!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI TUTOR TAB -->
+            <div id="tab-content-tutor" class="hidden w-full p-4 md:p-6 flex flex-col h-[calc(100vh-12rem)] lg:h-[calc(100vh-5rem)]">
+                <div class="max-w-4xl mx-auto w-full flex-1 flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-slate-50 border-b border-slate-200 p-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <div class="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center text-white">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-xs">מורה וירטואלי ייעודי למבחן</h3>
+                                <p class="text-[10px] text-emerald-600 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1"></span> מכיר את כל 20 נושאי המיקוד של ירדן</p>
+                            </div>
+                        </div>
+                        <button onclick="clearChatHistory()" class="text-slate-400 hover:text-red-500 text-xs flex items-center space-x-1 space-x-reverse transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span>נקה שיחה</span>
+                        </button>
+                    </div>
+
+                    <!-- Chat Box Area -->
+                    <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/40">
+                        <div class="flex space-x-2 space-x-reverse max-w-lg">
+                            <div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-robot text-xs"></i>
+                            </div>
+                            <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100 text-xs">
+                                <p class="leading-relaxed">היי! אני מורה ה-AI האישי שלך. למדתי לעומק את כל 20 המושגים למבחן שלך. שאל אותי שאלות מורכבות, בקש דוגמאות קוד, או שאל על מלכודות ספציפיות שהמרצה אוהב להכשיל עליהן!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat quick buttons -->
+                    <div class="p-2 border-t border-slate-100 bg-white flex space-x-2 space-x-reverse overflow-x-auto whitespace-nowrap">
+                        <button onclick="sendQuickPrompt('תן לי דוגמה למלכודת המבחן של אלמנט main ב-HTML5')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] px-3 py-1.5 rounded-full transition">מלכודת main ב-HTML5</button>
+                        <button onclick="sendQuickPrompt('למהlet בתוך פונקציה לא מוכר מחוצה לה? תן קוד קצר')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] px-3 py-1.5 rounded-full transition">טווח Let בפונקציות</button>
+                        <button onclick="sendQuickPrompt('איך נוצר ונמחק Session בשרת במדויק במבחן')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] px-3 py-1.5 rounded-full transition">סשן מול עוגיות בשרת</button>
+                    </div>
+
+                    <div class="p-3 border-t border-slate-200 bg-white flex items-center space-x-2 space-x-reverse">
+                        <input type="text" id="chat-input-field" onkeypress="handleChatKeyPress(event)" placeholder="שאל שאלה מתוך נושאי המבחן..." class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <button onclick="sendChatMessage()" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-lg transition shrink-0">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI ANALYZER TAB -->
+            <div id="tab-content-analyzer" class="hidden w-full p-4 md:p-6">
+                <div class="max-w-3xl mx-auto">
+                    <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl p-5 text-white mb-6 shadow">
+                        <h2 class="text-lg font-bold mb-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> מנתח קוד ומלכודות המבחן</h2>
+                        <p class="text-amber-100 text-xs">הדבק קטע קוד (HTML/CSS/JS/JSON) וה-AI יבצע סריקה מיידית למציאת שגיאות תקן, דברים לא תקניים שיגרמו לקריסה, או מלכודות מתוך המבחן.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                            <label class="block text-xs font-bold text-slate-700 mb-2">הדבק את הקוד שלך כאן:</label>
+                            <textarea id="analyzer-code-input" rows="8" placeholder="לדוגמה: {'name': 'Yossi'} או <main><article><main>...</main></article></main>" class="w-full font-mono text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 mb-4"></textarea>
+                            <button onclick="analyzeInputCode()" class="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold py-2.5 rounded-lg transition flex items-center justify-center space-x-2 space-x-reverse">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <span>נתח קוד ומצא מלכודות מבחן</span>
+                            </button>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-700 mb-2">דוגמאות מומלצות לבדיקה:</h4>
+                                <ul class="space-y-1.5 text-[11px] text-slate-500 list-disc list-inside">
+                                    <li>קוד JSON עם גרש בודד (לא תקין!)</li>
+                                    <li>קוד המכיל שני אלמנטי `main` (לא תקין!)</li>
+                                    <li>סלקטור CSS המחיל עיצוב על a ללא href</li>
+                                    <li>משתנה Let בתוך לולאה שמנסים להדפיס בחוץ</li>
+                                </ul>
+                            </div>
+                            <div class="mt-4 p-3 bg-amber-50 border border-amber-100 rounded-lg text-[10px] text-amber-800 font-semibold leading-relaxed">
+                                שימו לב: הניתוח מתבצע בזמן אמת על בסיס חוקי השפה ומבנה המבחן.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="analyzer-output-area" class="mt-4 bg-white rounded-xl border border-slate-200 p-5 shadow-sm hidden">
+                        <!-- Output loaded by JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl border border-slate-200 p-6 max-w-md w-full shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-slate-800 text-sm">הגדרות Gemini API</h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                על מנת להשתמש בכלי ה-AI הדינמיים (סימולטור, מורה וירטואלי, ומנתח קוד), תוכל להזין מפתח Gemini API אישי שיישמר בדפדפן שלך בלבד:
+            </p>
+            <div class="mb-4">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">מפתח Gemini API Key:</label>
+                <input type="password" id="api-key-input" placeholder="הזן מפתח API..." class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex justify-end space-x-2 space-x-reverse">
+                <button onclick="toggleSettingsModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg transition">ביטול</button>
+                <button onclick="saveApiKey()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">שמור מפתח</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let geminiApiKey = localStorage.getItem('gemini_api_key') || "";
+        const fallbackModel = "gemini-3-flash-preview";
+        let selectedSimulatorTopic = 'html';
+
+        // Syllabus Context
+        const studyMaterialContext = `
+        HTML: שפת סימון (Markup), לא שפת תכנות. סלחנית לשגיאות, דפדפן יציג דברים גם עם טעויות. לא כל תג פתיחה חייב תג סגירה, לא כל ערך חייב גרשיים. ריבוי רווחים/אנטר מוצגים כרווח אחד.
+        אלמנט DIV: Block, חסר סמנטיקה. סתם קופסה לחלוקה ועיצוב.
+        HTML5: אלמנטים סמנטיים (header, nav, section, article). אלמנט <main> מייצג תוכן ייחודי וראשי, מותר רק אחד בדף ואסור שיהיה תת אלמנט של header, nav, section, article.
+        JSON: פורמט טקסטואלי string להעברת נתונים. משמש בכל השפות. מפתחות וערכים חייבים להיות בגרשיים כפולים "" בלבד! גרש בודד '' לא חוקי. {} אובייקט, [] מערך.
+        Cookies: נשמרות בדפדפן (צד לקוח), מוגבלות בגודל, נשלחות אוטומטית לשרת בכל פנייה.
+        Session: אובייקט בשרת בלבד. נוצר בפנייה הראשונה. שני דפדפנים באותו מחשב = 2 סשנים שונים. נסגר בטיימאאוט או הריסה מפורשת.
+        JS: אינטרפרטציה (שורה-שורה) ולא קומפילציה. let scope מוגבל בתוך פונקציות/בלוקים. const ערך קבוע פעם אחת בלבד. אסור להתחיל משתנה במספר.
+        פונקציות ב-JS: אנונימית ללא שם. Callback היא פונקציה שנשלחת כפרמטר ורצה בתגובה לאירוע.
+        Fetch: שליחת בקשות HTTP לקבלת נתונים ללא רענון הדף. אסינכרונית.
+        Node.js: סביבת הרצה ל-JS מחוץ לדפדפן (צד שרת). משתמשים ב-Pool של חיבורים לבסיס נתונים כי פתיחת חיבור לוקחת זמן.
+        Frontend vs Backend: Frontend בדפדפן (HTML/CSS/JS). Backend בשרת (DB/Logic). בסיסי נתונים תמיד ב-Backend.
+        `;
+
+        // Extended 20 Concepts matching the entire syllabus
+        const concepts = [
+            { id: 1, category: 'html', title: '1. מהות שפת HTML', desc: 'שפת סימון (Markup), לא שפת תכנות. היא סלחנית מאוד לשגיאות קוד והדפדפן יציג דברים כמיטב יכולתו בכל מקרה.', example: '<img src=1.gif>\n<!-- קוד תקין לגמרי למרות שאין גרשיים ואין תג סגירה! -->', trap: 'המרצה ישאל האם שגיאת קוד באלמנט תגרום לקריסת המסמך. התשובה היא לא! השפה סלחנית לגמרי.' },
+            { id: 2, category: 'html', title: '2. אלמנטים ותגים ב-HTML', desc: 'מסמך HTML מורכב מתגים פנימיים וחיצוניים, תגי קישור פנימיים יכולים לקשר למזהים (id) ספציפיים באותו מסמך.', example: '<a href="#intro">מעבר למבוא</a>\n<section id="intro">מבוא</section>', trap: 'תג קישור <a> יכול לקשר לכתובת אינטרנט חיצונית או לעוגן פנימי באותו דף בעזרת סימן סולמית # וה-id.' },
+            { id: 3, category: 'html', title: '3. אלמנט DIV וחוסר סמנטיקה', desc: 'אלמנט Block המשמש כ"קופסה ריקה" לחלוקת הדף ועיצובו. חסר כל משמעות סמנטית.', example: '<div>\n  <span>תוכן לקבוצה</span>\n</div>', trap: 'המרצה יטען ש-DIV מגדיר בצורה סמנטית פסקאות או פרקים - לא נכון! הוא חסר משמעות סמנטית לגמרי.' },
+            { id: 4, category: 'js', title: '4. שפת התכנות JavaScript', desc: 'שפת תכנות דינמית שעוברת אינטרפרטציה (רצה שורה-שורה בזמן אמת בדפדפן) ולא קומפילציה. נועדה לניהול ממשק המשתמש והדינמיות.', example: '// קוד JS רץ שורה אחר שורה ישירות בדפדפן\nconsole.log("Hello World");', trap: 'המרצה ינסה לטעון ש-JS היא שפת קומפילציה. לא נכון! היא שפת אינטרפרטציה (Interpreted).' },
+            { id: 5, category: 'js', title: '5. משתנים ב-JS חוקים וסוגים', desc: 'לכל משתנה יש סוג נתונים (Type) שנקבע דינמית. אסור להתחיל משתנה במספר. משתמשים במילים השמורות let ו-const.', example: 'let userAge = 25; // תקין\nlet 1user = "Avi"; // לא תקין! אסור להתחיל במספר', trap: 'משתנה שמוגדר עם let בתוך פונקציה חסום בה ואינו מוכר מחוצה לה!' },
+            { id: 6, category: 'js', title: '6. פונקציות ב-JS ופונקציות Callback', desc: 'פונקציה יכולה להיכתב ללא שם (פונקציה אנונימית) ולהישלח כפרמטר (Callback) שיופעל בתגובה לאירוע.', example: 'button.onclick = function() {\n  console.log("הופעל Callback");\n};', trap: 'Callback יכול להיות אנונימי (ללא שם) או פונקציה רגילה בעלת שם מוגדר מראש.' },
+            { id: 7, category: 'data', title: '7. מבנה JSON חוקים ברורים', desc: 'פורמט טקסטואלי (String) להעברת נתונים. חוק הברזל: מפתחות וערכים חייבים להיות עטופים בגרשיים כפולים בלבד ("").', example: '{\n  "status": "success",\n  "code": 200\n}', trap: 'גרש בודד (\') או חוסר גרשיים על המפתחות אינו חוקי ב-JSON!' },
+            { id: 8, category: 'html', title: '8. סמנטיקה ב-HTML5 ואלמנט main', desc: 'אלמנט <main> מייצג את התוכן הראשי הייחודי של המסמך. מותר שיהיה רק אחד כזה, ואסור שיופיע בתוך article, header, nav או section.', example: '<body>\n  <main>\n    <h1>התוכן הייחודי של העמוד</h1>\n  </main>\n</body>', trap: 'חפשו קוד שבו main מופיע פעמיים או נמצא בתוך article - זהו קוד לא תקני!' },
+            { id: 9, category: 'css', title: '9. עיצוב רספונסיבי (Responsive)', desc: 'עיצוב המותאם למגוון מסכים (ניידים ומחשבים). הגישה השלטת היא Mobile First - מעצבים קודם למסך הקטן ביותר ואז למסכים גדולים.', example: '@media (min-width: 768px) {\n  /* קוד עיצוב למסכים גדולים ומעלה */\n}', trap: 'עיצוב רספונסיבי מחייב תמיכה מינימלית בלפחות שני גדלי מסך (נייד ומחשב).' },
+            { id: 10, category: 'data', title: '10. מנגנון ה-Cookies (עוגיות)', desc: 'פיסת מידע קטנה הנשמרת ישירות על מחשב הלקוח (הדפדפן). נקבעת על ידי השרת ונשלחת אליו אוטומטית בכל בקשה מחדש.', example: '// עוגיה נשמרת אצל הלקוח בלבד\ndocument.cookie = "username=Yossi; max-age=3600";', trap: 'המרצה יטען שעוגיות נשמרות בשרת - טעות! הן נשמרות בדפדפן הלקוח.' },
+            { id: 11, category: 'html', title: '11. יישומי Web וכללי הדפדפן', desc: 'יישום העושה שימוש בדפדפן כממשק קצה. הדפדפן יודע להריץ אך ורק 3 שפות: HTML (מבנה), CSS (עיצוב), ו-JavaScript (פעולות).', example: 'Frontend: HTML, CSS, JS\nBackend: Node.js, Python, Databases', trap: 'הדפדפן אינו יודע להריץ ישירות קוד Backend כגון Python או SQL.' },
+            { id: 12, category: 'data', title: '12. שימוש ב-JSON בכל שפה', desc: 'JSON הוא פורמט טקסטואלי גלובלי. משתמשים בו בכל שפות התכנות להעברת מידע, ולא רק ב-JavaScript.', example: '// המרה ב-JS\nlet str = JSON.stringify(obj); // מאובייקט לטקסט\nlet parsed = JSON.parse(str); // מטקסט לאובייקט', trap: 'המרצה יטען ש-stringify הופך טקסט לאובייקט - טעות! הוא הופך אובייקט לטקסט.' },
+            { id: 13, category: 'css', title: '13. מלכודת ה-CSS (השאלה מהתמונה)', desc: 'סלקטור מורכב דורש שכל התנאים יתקיימו. div a[href] פונה רק לקישור עם href שנמצא פיזית בתוך div.', example: 'div a[href] { color: red; }\n\n<!-- <div><a href="">אדום!</a></div> -->\n<!-- <p><a href="">לא אדום</a></p> -->', trap: 'קישור ללא מאפיין href או קישור שמופיע מחוץ ל-div (למשל בתוך פסקה p) לא ייצבע באדום!' },
+            { id: 14, category: 'js', title: '14. עץ ה-DOM הדינמי', desc: 'מבנה נתונים היררכי (עץ) שהדפדפן בונה ממסמך ה-HTML. כל אלמנט הופך לאובייקט ב-JS, ושינוי שלו משנה מיד את מה שרואים על המסך.', example: 'document.getElementById("stam").style.color = "blue";', trap: 'שינויים ב-DOM אינם קבועים בקובץ ה-HTML המקורי בשרת, אלא דינמיים בלבד אצל הלקוח.' },
+            { id: 15, category: 'js', title: '15. מתודת Fetch לתקשורת', desc: 'פונקציה המאפשרת לבקש ולקבל נתונים משרתים לפי כתובת (URL) ללא צורך בריענון או טעינת הדף מחדש.', example: 'fetch(url)\n  .then(res => res.json())\n  .then(data => console.log(data));', trap: 'היא אסינכרונית ומחזירה Promise. היא אינה מרעננת או מחליפה את העמוד הנוכחי.' },
+            { id: 16, category: 'backend', title: '16. סביבת Node.js', desc: 'סביבת הרצה המאפשרת להריץ קוד JavaScript מחוץ לדפדפן (בצד השרת בלבד). משמשת בעיקר לפיתוח Backend.', example: '// app.js רץ בשרת\nconst fs = require("fs");\nconsole.log("רץ בשרת");', trap: 'Node.js אינה שפה חדשה, אלא סביבת הרצה לקוד JS סטנדרטי.' },
+            { id: 17, category: 'data', title: '17. מנגנון ה-Session (סשן)', desc: 'אובייקט זיכרון השמור בשרת בלבד ומזוהה אישית לכל משתמש קצה. נוצר בפנייה הראשונה ונמחק בטיימאאוט או סגירה מפורשת.', example: 'Session: נשמר בשרת (מאובטח)\nCookies: נשמר בדפדפן (פחות מאובטח)', trap: 'שני דפדפנים שונים באותו מחשב (למשל כרום ואדג\') ייצרו שני סשנים שונים לחלוטין בשרת!' },
+            { id: 18, category: 'backend', title: '18. בסיסי נתונים ו-Connection Pool', desc: 'פתיחת חיבור חדש לבסיס הנתונים לוקחת זמן רב. לכן, משתמשים ב-Pool (בריכת חיבורים פתוחים מראש) כדי לייעל את המערכת.', example: 'const pool = mysql.createPool({ connectionLimit: 10 });', trap: 'בשימוש ב-Pool, החיבורים פתוחים מראש ומנוהלים בזיכרון, דבר החוסך זמן תגובה יקר.' },
+            { id: 19, category: 'backend', title: '19. פיתוח ה-Backend ותפקידו', desc: 'צד השרת. אחראי על לוגיקת האפליקציה, אבטחת מידע, שמירה ושליפה של נתונים מבסיסי הנתונים והתאמה אישית למשתמשים.', example: 'Server -> Database (MySQL/MongoDB) -> Client', trap: 'בסיסי נתונים תמיד נמצאים ומנוהלים בצד ה-Backend ולא בצד הלקוח (Frontend).' },
+            { id: 20, category: 'backend', title: '20. אפליקציית WEB שלמה', desc: 'מערכת המשלבת Frontend (HTML/CSS/JS) הרצה בדפדפן הלקוח, ו-Backend (שרת, בסיס נתונים) הרצה בשרת.', example: 'Client Request -> Server Process -> DB -> Server Response', trap: 'הדפדפן תומך אך ורק ב-HTML, CSS ו-JavaScript. שום שרת Backend לא רץ ישירות בדפדפן.' }
+        ];
+
+        const quizQuestions = [
+            {
+                question: "מה נכון בנוגע ל-HTML? (שאלה 1 ממועד א')",
+                options: [
+                    "א. כל תג פתיחה חייב להכיל תג סגירה תואם.",
+                    "ב. אם יש שגיאה באלמנט של HTML המסמך כולו אינו יוצג בדפדפן.",
+                    "ג. לכל מאפיין חייב להיות ערך בגרשיים.",
+                    "ד. HTML אינה מבוססת על XML."
+                ],
+                correctIndex: 3,
+                explanation: "HTML היא שפה סלחנית מאוד שנועדה להציג תוכן בכל מקרה. היא אינה מבוססת על XML, לה יש חוקים נוקשים מאוד (שם הכל חייב להיסגר ולהיות בגרשיים)."
+            },
+            {
+                question: "קטע הקוד <img src=1.gif> מופיע במסמך HTML. מה נכון בנוגע אליו? (שאלה 2 ממועד א')",
+                options: [
+                    "א. לפי התקן, אפשר להשתמש רק בתמונות מסוג gif.",
+                    "ב. אי אפשר להשתמש באלמנט img בתוך אלמנט div.",
+                    "ג. בקוד יש שגיאה מפני ששם הקובץ אינו בגרשיים.",
+                    "ד. הקוד יהיה תקין גם אם במקום שם הקובץ יהיה URL של תמונה."
+                ],
+                correctIndex: 3,
+                explanation: "HTML אינו מחייב גרשיים במקרה זה והקוד תקין לגמרי. כמו כן, ניתן להשתמש בכתובת URL מלאה של תמונה במקום שם קובץ מקומי."
+            },
+            {
+                question: "מה נכון בנוגע למשתנים ב-JavaScript? (שאלה 3 ממועד א')",
+                options: [
+                    "א. שמות של משתנים אפשר להתחיל במספר.",
+                    "ב. למשתנים יש סוג נתונים.",
+                    "ג. אי אפשר להגדיר משתנה בתוך פונקציה.",
+                    "ד. בכל שורה שנותנים ערך למשתנה חייבת להיות מילה שמורה let."
+                ],
+                correctIndex: 1,
+                explanation: "לכל משתנה ב-JS יש סוג נתונים (מספר, טקסט וכו') שנקבע דינמית. אסור להתחיל משתנה במספר, ומשתמשים ב-let רק בפעם הראשונה שמגדירים אותו."
+            },
+            {
+                question: "מה נכון בנוגע לשימוש בפונקציות ב-JavaScript? (שאלה 4 ממועד א')",
+                options: [
+                    "א. יכולה להיות פונקציה ללא שם.",
+                    "ב. אם הגדרנו פונקציה חייבים להפעיל אותה במפורש.",
+                    "ג. כל הפונקציות שמשתמשים בהן בדף ספציפי חייבות להיות בקובץ אחד.",
+                    "ד. פרמטרים של פונקציה שנקבעו בעת הגדרתה חייבים לקבל את ערכם בעת הפעלת הפונקציה."
+                ],
+                correctIndex: 0,
+                explanation: "ב-JS נפוץ מאוד שימוש בפונקציות אנונימיות (ללא שם), בעיקר עבור פונקציות Callback המועברות לפרמטרים של אירועים."
+            },
+            {
+                question: "קטע קוד כלשהו כתוב במסמך HTML. מה נכון בנוגע לו ולאלמנט xxx? (שאלה 2 בסילבוס)",
+                options: [
+                    "א. בתוך אלמנטים שונים לא יכולים להיות אלמנטים אחרים.",
+                    "ב. תג קישור <a> יכול לקשר רק לעמודים חיצוניים.",
+                    "ג. תג קישור <a> יכול לקשר לתוך אותו מסמך HTML בעזרת id פנימי.",
+                    "ד. אלמנטים חייבים להיסגר באותו שורה שבה נפתחו."
+                ],
+                correctIndex: 2,
+                explanation: "תג קישור <a> יכול לקשר לעוגן/אלמנט פנימי בתוך אותו דף באמצעות שימוש בסימן סולמית # ומזהה ה-id של האלמנט המבוקש."
+            },
+            {
+                question: "מה נכון בנוגע לאלמנט DIV? (שאלה 3 בסילבוס)",
+                options: [
+                    "א. אלמנט DIV מיועד להגדיר בצורה סמנטית את פרקי המסמך.",
+                    "ב. אלמנט DIV הוא אלמנט Block, חסר סמנטיקה, המשמש לחלוקה ועיצוב.",
+                    "ג. אלמנט DIV חייב להכיל תמיד אלמנט p בתוכו.",
+                    "ד. לא ניתן לשנות את העיצוב של אלמנט DIV ב-CSS."
+                ],
+                correctIndex: 1,
+                explanation: "אלמנט DIV הוא אלמנט Block חסר סמנטיקה לחלוטין. הוא משמש כקופסה ריקה לקבוצת אלמנטים או לצורכי עיצוב ופריסת הדף."
+            },
+            {
+                question: "מה נכון בנוגע לשפת התכנות JavaScript? (שאלה 4 בסילבוס)",
+                options: [
+                    "א. היא שפה שעוברת קומפילציה מלאה מראש.",
+                    "ב. השפה פותחה כדי לנהל את ה-Backend בלבד.",
+                    "ג. היא שפה שעוברת אינטרפרטציה (הקוד רץ שורה אחר שורה בזמן אמת).",
+                    "ד. היא אינה נתמכת על ידי דפדפנים מודרניים."
+                ],
+                correctIndex: 2,
+                explanation: "JavaScript היא שפת אינטרפרטציה (Interpreted) - הדפדפן קורא ומריץ את הקוד שורה אחר שורה בזמן אמת ללא קומפילציה מוקדמת."
+            },
+            {
+                question: "הגדרת משתנה עם let בתוך פונקציה. מה נכון בנוגע לטווח ההכרה (Scope) שלו? (שאלה 5 בסילבוס)",
+                options: [
+                    "א. הוא מוכר בכל הקבצים האחרים באפליקציה.",
+                    "ב. הוא מוכר מחוץ לפונקציה בלבד.",
+                    "ג. הוא אינו מוכר מחוץ לפונקציה.",
+                    "ד. הוא הופך אוטומטית למשתנה קבוע (const)."
+                ],
+                correctIndex: 2,
+                explanation: "משתנה let שהוגדר בתוך פונקציה מוגבל לטווח הפונקציה בלבד (Local Scope), והוא אינו קיים או מוכר מחוצה לה."
+            },
+            {
+                question: "מה נכון בנוגע לפונקציית Callback ב-JavaScript? (שאלה 6 בסילבוס)",
+                options: [
+                    "א. היא חייבת תמיד להכיל שם מוגדר.",
+                    "ב. היא פונקציה המופעלת בתגובה לאירוע אחר במערכת, ויכולה להיות ללא שם.",
+                    "ג. היא יכולה להיכתב רק ב-Node.js.",
+                    "ד. היא רצה מיד עם טעינת הדף, ללא קשר לאירועים."
+                ],
+                correctIndex: 1,
+                explanation: "פונקציית Callback מועברת כפרמטר ומופעלת בתגובה לאירוע (למשל קליק). היא יכולה להיות אנונימית (ללא שם) או בעלת שם."
+            },
+            {
+                question: "איזה חוק הוא חוק ברזל בבניית קוד JSON תקין? (שאלה 7 בסילבוס)",
+                options: [
+                    "א. מותר להשתמש בגרש בודד (') עבור ערכי טקסט.",
+                    "ב. מפתחות וערכים (סוג טקסט) חייבים להיות עטופים בגרשיים כפולים בלבד (\"\").",
+                    "ג. לא ניתן להגדיר מערך בתוך JSON.",
+                    "ד. JSON הוא פורמט שנתמך רק ב-JavaScript."
+                ],
+                correctIndex: 1,
+                explanation: "ב-JSON חובה להשתמש בגרשיים כפולים (\"\") בלבד עבור מפתחות וערכי מחרוזת. גרש בודד (\') הוא שגיאת תחביר חמורה ב-JSON."
+            },
+            {
+                question: "מה נכון בנוגע לאלמנט <main> ב-HTML5? (שאלה 8 בסילבוס)",
+                options: [
+                    "א. מותר שיופיע כמה פעמים בדף אחד.",
+                    "ב. מותר שהוא יהיה תת-אלמנט של article או header.",
+                    "ג. מותר שיהיה רק אלמנט <main> אחד ויחיד בדף, והוא אינו יכול להיות צאצא של header או article סמנטי.",
+                    "ד. הוא אלמנט חובה בכל דף HTML, אחרת הדף לא ייטען."
+                ],
+                correctIndex: 2,
+                explanation: "ב-HTML5, אלמנט <main> מייצג את התוכן הראשי הייחודי. מותר רק אחד כזה בדף, ואסור שהוא יהיה צאצא של אלמנטים סמנטיים כמו header, nav, section, או article."
+            },
+            {
+                question: "מה נכון בנוגע לעיצוב רספונסיבי (Responsive Design)? (שאלה 9 בסילבוס)",
+                options: [
+                    "א. תמיד מעצבים קודם כל למסך מחשב גדול, ואז מצמצמים עבור סלולר.",
+                    "ב. גישת 'Mobile First' אומרת שמעצבים קודם כל למסכים הקטנים (סלולר) ואז מתאימים למסכים הגדולים.",
+                    "ג. עיצוב רספונסיבי מונע מהאתר להריץ קוד JavaScript.",
+                    "ד. מספיק לתמוך בגודל מסך אחד בלבד בעיצוב רספונסיבי."
+                ],
+                correctIndex: 1,
+                explanation: "גישת הברזל המודרנית היא Mobile First - מעצבים תחילה עבור המסך הקטן והמוגבל ביותר, ולאחר מכן משתמשים ב-Media Queries כדי להוסיף חוקי עיצוב והרחבות למסכים גדולים יותר."
+            },
+            {
+                question: "היכן נשמרות עוגיות (Cookies) של יישום אינטרנט? (שאלה 10 בסילבוס)",
+                options: [
+                    "א. בזיכרון ה-RAM של שרת האפליקציה.",
+                    "ב. בתוך בסיס הנתונים של ה-Backend.",
+                    "ג. על גבי הארד דיסק / דפדפן של מחשב הלקוח.",
+                    "ד. הן נמחקות מיד ברגע שהמשתמש סוגר את הלשונית."
+                ],
+                correctIndex: 2,
+                explanation: "עוגיות נשמרות בדפדפן של המשתמש (צד לקוח), והדפדפן שולח אותן בחזרה לשרת בכל בקשת HTTP מחדש."
+            },
+            {
+                question: "בדפדפן האינטרנט של הלקוח (Frontend), באילו שפות הוא מסוגל להשתמש? (שאלה 11 בסילבוס)",
+                options: [
+                    "א. HTML, CSS, JavaScript, ו-SQL.",
+                    "ב. רק ב-HTML ו-CSS.",
+                    "ג. ב-HTML, CSS ו-JavaScript בלבד.",
+                    "ד. בכל שפה כולל Python ו-Node.js במידה והן מותקנות בשרת."
+                ],
+                correctIndex: 2,
+                explanation: "הדפדפן תומך ומריץ אך ורק 3 שפות בצד הלקוח: HTML (למבנה), CSS (לעיצוב), ו-JavaScript (ללוגיקה ודינמיות)."
+            },
+            {
+                question: "איזה מהבאים אינו תקין בפורמט JSON? (שאלה 12 בסילבוס)",
+                options: [
+                    "א. שימוש בגרשיים כפולים על המפתחות.",
+                    "ב. שימוש בגרש בודד (') לעטיפת מפתחות או ערכים.",
+                    "ג. הגדרת מערך של אובייקטים בתוך סוגריים מרובעים [].",
+                    "ד. שימוש במספרים ללא גרשיים כערכים מספריים."
+                ],
+                correctIndex: 1,
+                explanation: "שימוש בגרש בודד (') אינו תקני ב-JSON בשום אופן. חובה להשתמש בגרשיים כפולים בלבד (\"\")."
+            },
+            {
+                question: "על פי הגדרת ה-CSS הבאה: div a[href] { color: red; } איזה קוד HTML ייצבע באדום? (שאלה 13 בסילבוס - מהתמונה)",
+                options: [
+                    "א. <div>test <a id='h1'>stam</a></div>",
+                    "ב. <p><a href=''>stam</a></p>",
+                    "ג. <div>test <a href=''>stam</a></div>",
+                    "ד. כל האלמנטים המכילים את המילה stam."
+                ],
+                correctIndex: 2,
+                explanation: "הסלקטור דורש שני דברים: שהקישור <a> יהיה בתוך <div> ושתהיה לו תכונת href. רק אופציה ג' עונה על שני התנאים."
+            },
+            {
+                question: "מהו עץ ה-DOM? (שאלה 14 בסילבוס)",
+                options: [
+                    "א. בסיס נתונים לשמירת נתונים בשרת.",
+                    "ב. מבנה נתונים היררכי בזיכרון הדפדפן המייצג את מסמך ה-HTML, וכל שינוי בו משנה מיד את המוצג על המסך.",
+                    "ג. פרוטוקול אבטחה להעברת קבצים.",
+                    "ד. מנוע ההרצה של Node.js."
+                ],
+                correctIndex: 1,
+                explanation: "DOM הוא עץ היררכי שנבנה מה-HTML. כל שינוי של אובייקט בעץ זה באמצעות JS משנה באופן מיידי ודינמי את התצוגה הוויזואלית למשתמש."
+            },
+            {
+                question: "מהו תפקידה של מתודת fetch ב-JavaScript? (שאלה 15 בסילבוס)",
+                options: [
+                    "א. לרענן את כל הדף הנוכחי על מנת לעדכן נתונים.",
+                    "ב. לבקש ולקבל נתונים מהשרת באופן אסינכרוני, ללא צורך בריענון או טעינת הדף מחדש.",
+                    "ג. לשנות את סגנון ה-CSS של הדף.",
+                    "ד. למחוק את העוגיות (Cookies) של המשתמש."
+                ],
+                correctIndex: 1,
+                explanation: "fetch שולחת בקשות HTTP אסינכרוניות לקבלת נתונים מהשרת (בפורמט JSON לרוב), ומאפשרת לעדכן את הדף דינמית ללא ריענון."
+            },
+            {
+                question: "מה נכון לגבי Node.js? (שאלה 16 בסילבוס)",
+                options: [
+                    "א. היא שפת תכנות חדשה לחלוטין שהחליפה את JavaScript.",
+                    "ב. היא סביבת הרצה המאפשרת להריץ קוד JavaScript מחוץ לדפדפן (בצד השרת).",
+                    "ג. היא תוסף לדפדפן כרום שמאיץ טעינת אתרים.",
+                    "ד. היא משמשת לעיצוב רספונסיבי בלבד."
+                ],
+                correctIndex: 1,
+                explanation: "Node.js היא סביבת הרצה (Runtime Environment) המאפשרת להריץ קוד JS בצד השרת, מחוץ לגבולות הדפדפן."
+            },
+            {
+                question: "מה נכון בנוגע ל-Session (סשן)? (שאלה 17 בסילבוס)",
+                options: [
+                    "א. הוא אובייקט זיכרון שנשמר במחשב הלקוח.",
+                    "ב. הוא אובייקט זיכרון השמור בשרת, והוא נוצר אוטומטית בפנייה הראשונה של המשתמש.",
+                    "ג. אם נפתח שני דפדפנים שונים באותו מחשב מול אותו שרת, נשתמש באותו סשן בדיוק.",
+                    "ד. סשן נשאר פעיל לנצח ואינו יכול להימחק על ידי טיימאאוט."
+                ],
+                correctIndex: 1,
+                explanation: "סשן נשמר בשרת בלבד. שני דפדפנים שונים באותו מחשב ייצרו שני סשנים שונים בשרת. הוא נמחק בטיימאאוט או בהריסה מפורשת."
+            },
+            {
+                question: "מדוע משתמשים ב-Connection Pool בעבודה מול בסיסי נתונים ב-Node.js? (שאלה 18 בסילבוס)",
+                options: [
+                    "א. מכיוון ש-Node.js אינו תומך בחיבור בודד.",
+                    "ב. פתיחה של חיבור (Connection) חדש לוקחת זמן יקר, ולכן עדיף להחזיק בריכת חיבורים פתוחים ומוכנים מראש.",
+                    "ג. ה-Pool דרוש כדי לתרגם את קוד ה-JS לשפת SQL.",
+                    "ד. כדי לאפשר גישה ישירה של הלקוח (Frontend) לבסיס הנתונים."
+                ],
+                correctIndex: 1,
+                explanation: "פתיחת חיבור חדש מול בסיס נתונים היא פעולה איטית המאטה את האפליקציה. Connection Pool פותר זאת על ידי החזקת קבוצת חיבורים פתוחים ומוכנים לשימוש חוזר."
+            },
+            {
+                question: "מה נכון בנוגע לפיתוח Backend? (שאלה 19 בסילבוס)",
+                options: [
+                    "א. מטרתו היחידה היא לעצב את כפתורי האתר.",
+                    "ב. הוא מתבצע כולו בתוך דפדפן המשתמש.",
+                    "ג. הוא מנהל את הלוגיקה, האבטחה, השרת ובסיסי הנתונים.",
+                    "ד. בסיסי נתונים תמיד מנוהלים בצד ה-Frontend ולא ב-Backend."
+                ],
+                correctIndex: 2,
+                explanation: "ה-Backend אחראי על צד השרת, לוגיקת האפליקציה, אבטחת מידע, אינטראקציה עם בסיסי הנתונים וניהול המידע הנסתר מהמשתמש."
+            },
+            {
+                question: "מה נכון לגבי אפליקציית WEB שלמה? (שאלה 20 בסילבוס)",
+                options: [
+                    "א. היא רצה כולה בשרת ואינה דורשת דפדפן.",
+                    "ב. היא משלבת Frontend הרץ בדפדפן הלקוח ו-Backend הרץ בשרת.",
+                    "ג. קוד ה-Backend (שרת, DB) רץ ישירות בתוך הדפדפן.",
+                    "ד. היא אינה עושה שימוש ב-JavaScript."
+                ],
+                correctIndex: 1,
+                explanation: "אפליקציית ווב מודרנית משלבת שני חלקים עיקריים: ה-Frontend (צד לקוח) המציג את ממשק המשתמש בדפדפן, וה-Backend (צד שרת) המנהל את המידע מאחורי הקלעים."
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let selectedQuizOptionIdx = null;
+        let quizIsAnswered = false;
+        let currentCategory = 'all';
+        let currentGeneratedQuestionObj = null;
+        const chatHistory = [];
+
+        function initCharts() {
+            const ctx1 = document.getElementById('browserLangsChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['HTML', 'CSS', 'JS'],
+                    datasets: [{
+                        data: [33, 33, 34],
+                        backgroundColor: ['#f97316', '#3b82f6', '#eab308'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function switchTab(tabId) {
+            document.getElementById('tab-content-study').classList.add('hidden');
+            document.getElementById('tab-content-quiz').classList.add('hidden');
+            document.getElementById('tab-content-simulator').classList.add('hidden');
+            document.getElementById('tab-content-tutor').classList.add('hidden');
+            document.getElementById('tab-content-analyzer').classList.add('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-btn-mobile').forEach(btn => btn.classList.remove('bg-blue-600', 'text-white'));
+
+            document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.getElementById(`tab-m-${tabId}`).classList.add('bg-blue-600', 'text-white');
+
+            if (tabId === 'study') {
+                document.getElementById('searchContainer').classList.remove('hidden');
+            } else {
+                document.getElementById('searchContainer').classList.add('hidden');
+            }
+
+            if (tabId === 'quiz') {
+                renderQuizCard();
+            }
+        }
+
+        function renderConcepts() {
+            const grid = document.getElementById('conceptsGrid');
+            grid.innerHTML = '';
+
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+
+            const filtered = concepts.filter(c => 
+                (currentCategory === 'all' || c.category === currentCategory) &&
+                (c.title.toLowerCase().includes(searchValue) || 
+                 c.desc.toLowerCase().includes(searchValue) ||
+                 c.trap.toLowerCase().includes(searchValue))
+            );
+
+            filtered.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'concept-card bg-white p-5 rounded-xl border border-slate-200 flex flex-col h-full shadow-sm';
+                
+                // Add highlight for gold gift questions (1 to 4)
+                const isGift = c.id <= 4;
+                const giftBadge = isGift ? `<span class="text-[10px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 uppercase font-bold flex items-center gap-1"><i class="fa-solid fa-gift"></i> שאלת מתנה מובטחת!</span>` : '';
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-bold text-slate-900 text-sm md:text-base">${c.title}</h4>
+                        <div class="flex items-center space-x-1.5 space-x-reverse">
+                            ${giftBadge}
+                            <span class="text-[9px] px-2 py-0.5 rounded bg-slate-100 text-slate-500 uppercase font-semibold">${c.category}</span>
+                        </div>
+                    </div>
+                    <p class="text-xs md:text-sm text-slate-600 mb-4 flex-1">${c.desc}</p>
+                    <div class="bg-slate-950 text-emerald-400 p-3 rounded text-xs font-mono mb-4 dir-ltr text-left overflow-x-auto whitespace-pre"><code>${escapeHtml(c.example)}</code></div>
+                    <div class="mt-auto pt-3 border-t border-red-50 bg-red-50/50 p-2.5 rounded-lg border border-red-100">
+                        <p class="text-xs text-red-600 font-bold flex items-center mb-1">
+                            <i class="fa-solid fa-triangle-exclamation ml-1.5 text-sm"></i> מלכודת המבחן של המרצה:
+                        </p>
+                        <p class="text-xs text-slate-700 leading-relaxed">${c.trap}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.sidebar-item').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+            
+            // Find active button and update style
+            const activeBtn = Array.from(document.querySelectorAll('.sidebar-item')).find(btn => 
+                btn.getAttribute('onclick').includes(`'${cat}'`)
+            );
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+            }
+
+            renderConcepts();
+        }
+
+        function filterConcepts() {
+            renderConcepts();
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function toggleSettingsModal() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('api-key-input').value = geminiApiKey;
+            }
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            geminiApiKey = key;
+            localStorage.setItem('gemini_api_key', key);
+            toggleSettingsModal();
+        }
+
+        function renderQuizCard() {
+            const wrapper = document.getElementById('quiz-wrapper');
+            
+            if (currentQuizIndex >= quizQuestions.length) {
+                renderQuizResults();
+                return;
+            }
+
+            const q = quizQuestions[currentQuizIndex];
+            let optionsHtml = '';
+            
+            q.options.forEach((opt, idx) => {
+                let btnStyle = "border-slate-200 bg-white hover:bg-slate-50";
+                let iconClass = "fa-circle text-slate-300";
+
+                if (quizIsAnswered) {
+                    if (idx === q.correctIndex) {
+                        btnStyle = "border-emerald-500 bg-emerald-50 text-emerald-800";
+                        iconClass = "fa-circle-check text-emerald-500";
+                    } else if (idx === selectedQuizOptionIdx) {
+                        btnStyle = "border-rose-500 bg-rose-50 text-rose-800";
+                        iconClass = "fa-circle-xmark text-rose-500";
+                    } else {
+                        btnStyle = "border-slate-100 bg-slate-50 opacity-60";
+                        iconClass = "fa-circle text-slate-200";
+                    }
+                }
+
+                optionsHtml += `
+                    <button onclick="selectQuizOption(${idx})" ${quizIsAnswered ? 'disabled' : ''} class="w-full text-right p-3 rounded-xl border ${btnStyle} transition text-xs font-semibold flex justify-between items-center shadow-sm">
+                        <span>${escapeHtml(opt)}</span>
+                        <i class="fa-solid ${iconClass} text-sm"></i>
+                    </button>
+                `;
+            });
+
+            const progressPercent = ((currentQuizIndex) / quizQuestions.length) * 100;
+
+            wrapper.innerHTML = `
+                <div class="w-full">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-slate-500">שאלה ${currentQuizIndex + 1} מתוך ${quizQuestions.length}</span>
+                        <span class="text-xs font-bold text-emerald-600">ניקוד נוכחי: ${quizScore}/${currentQuizIndex}</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full mb-4">
+                        <div class="bg-rose-500 h-2 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
+                    </div>
+
+                    <h3 class="font-bold text-slate-800 text-xs md:text-sm leading-relaxed mb-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        ${escapeHtml(q.question)}
+                    </h3>
+
+                    <div class="space-y-2 mb-4">
+                        ${optionsHtml}
+                    </div>
+
+                    ${quizIsAnswered ? `
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs leading-relaxed text-slate-700 mb-4">
+                            <p class="font-bold text-blue-800 flex items-center mb-1">
+                                <i class="fa-solid fa-circle-info ml-1.5 text-sm"></i> הסבר והכוונה למבחן:
+                            </p>
+                            <p class="mb-2">${escapeHtml(q.explanation)}</p>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="flex justify-between items-center border-t border-slate-100 pt-3">
+                    <button onclick="restartQuiz()" class="text-slate-400 hover:text-slate-700 text-xs font-semibold flex items-center space-x-1 space-x-reverse transition">
+                        <i class="fa-solid fa-arrow-rotate-right"></i>
+                        <span>אפס בוחן</span>
+                    </button>
+                    
+                    ${quizIsAnswered ? `
+                        <button onclick="nextQuizQuestion()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-5 py-2 rounded-lg shadow transition">
+                            ${currentQuizIndex === quizQuestions.length - 1 ? 'סיום בוחן' : 'השאלה הבאה'} <i class="fa-solid fa-arrow-left mr-1"></i>
+                        </button>
+                    ` : `
+                        <span class="text-xs text-slate-400 italic">בחר תשובה כדי להמשיך...</span>
+                    `}
+                </div>
+            `;
+        }
+
+        function selectQuizOption(idx) {
+            if (quizIsAnswered) return;
+            selectedQuizOptionIdx = idx;
+            quizIsAnswered = true;
+
+            const q = quizQuestions[currentQuizIndex];
+            if (idx === q.correctIndex) {
+                quizScore++;
+            }
+            renderQuizCard();
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            selectedQuizOptionIdx = null;
+            quizIsAnswered = false;
+            renderQuizCard();
+        }
+
+        function renderQuizResults() {
+            const wrapper = document.getElementById('quiz-wrapper');
+            const percent = (quizScore / quizQuestions.length) * 100;
+            
+            let feedbackTitle = "";
+            let feedbackDesc = "";
+            let feedbackColor = "";
+
+            if (percent >= 90) {
+                feedbackTitle = "עברת בציון מצוין! 🏆";
+                feedbackDesc = "הבנת מעולה את כל 20 השאלות והמלכודות של המרצה. אתה מוכן לחלוטין למבחן ללא חומר עזר!";
+                feedbackColor = "text-emerald-600";
+            } else if (percent >= 70) {
+                feedbackTitle = "עברת! ציון טוב מאוד 👍";
+                feedbackDesc = "מרבית החומר יושב אצלך טוב בראש, אך ישנן מספר מלכודות קטנות שבילבלו אותך. מומלץ לעבור שוב על כרטיסיות הלמידה.";
+                feedbackColor = "text-indigo-600";
+            } else {
+                feedbackTitle = "נדרש מעבר נוסף על החומר! 📚";
+                feedbackDesc = "אל דאגה, בדיוק בשביל זה הסימולטור כאן. קרא שוב את 20 כרטיסיות הלמידה הממוקדות ונסה שוב. אתה תצליח!";
+                feedbackColor = "text-rose-600";
+            }
+
+            wrapper.innerHTML = `
+                <div class="text-center py-6">
+                    <i class="fa-solid fa-square-poll-horizontal text-5xl text-rose-500 mb-3"></i>
+                    <h3 class="text-lg font-bold text-slate-800 mb-1">סיכום התוצאות שלך</h3>
+                    
+                    <div class="inline-block bg-slate-50 border border-slate-100 rounded-xl px-6 py-3 mb-4">
+                        <span class="block text-3xl font-extrabold ${feedbackColor}">${quizScore} / ${quizQuestions.length}</span>
+                        <span class="text-xs font-semibold text-slate-500">ציון: ${percent}%</span>
+                    </div>
+
+                    <h4 class="font-bold text-sm ${feedbackColor} mb-2">${feedbackTitle}</h4>
+                    <p class="text-xs text-slate-600 max-w-md mx-auto mb-6 leading-relaxed">${feedbackDesc}</p>
+
+                    <button onclick="restartQuiz()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-5 py-2.5 rounded-lg shadow transition">
+                        <i class="fa-solid fa-arrow-rotate-right ml-1"></i> נסה את הבוחן שוב
+                    </button>
+                </div>
+            `;
+        }
+
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            selectedQuizOptionIdx = null;
+            quizIsAnswered = false;
+            renderQuizCard();
+        }
+
+        async function callGeminiAPI(userQuery, systemInstruction = "") {
+            const apiKey = geminiApiKey;
+            if (!apiKey) {
+                throw new Error("אנא הזן מפתח Gemini API Key תקין על ידי לחיצה על גלגל השיניים בצד שמאל למעלה.");
+            }
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }]
+            };
+
+            if (systemInstruction) {
+                payload.systemInstruction = {
+                    parts: [{ text: systemInstruction }]
+                };
+            }
+
+            let delay = 1000;
+            const maxRetries = 3;
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`שגיאה בחיבור ל-API: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) {
+                        return text;
+                    } else {
+                        throw new Error("התקבלה תשובה ריקה מהשרת");
+                    }
+                } catch (error) {
+                    if (attempt === maxRetries) {
+                        throw error;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        function selectSimTopic(topic) {
+            selectedSimulatorTopic = topic;
+            document.querySelectorAll('.sim-topic-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+            });
+            document.getElementById(`topic-${topic}`).classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+            document.getElementById(`topic-${topic}`).classList.remove('bg-slate-100', 'text-slate-700');
+        }
+
+        async function generateAIQuestion() {
+            const container = document.getElementById('simulator-interactive-area');
+            
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-3"></div>
+                    <p class="text-xs font-semibold text-slate-600">ה-Gemini מייצר שאלת מבחן מכשילה עם מלכודת מובנית...</p>
+                </div>
+            `;
+
+            const prompt = `
+            מיין שאלה אמריקאית (מבוססת בחירה מרובה) בנושא הבא: ${selectedSimulatorTopic}.
+            קרא את חומר המבחן שניתן:
+            ${studyMaterialContext}
+
+            השאלה צריכה להיות בעברית ובנויה בדיוק בסגנון המבחן של המרצה: כולל דקויות, "מלכודת מבחן" קשה או שאלת "מה נכון לגבי...".
+            אנא החזר את השאלה בפורמט JSON בלבד. אל תוסיף שום מילים מחוץ לפורמט.
+            הפורמט המבוקש בדיוק:
+            {
+              "question": "כאן תנוסח השאלה המלאה",
+              "options": [
+                "א. כאן מסיח א",
+                "ב. כאן מסיח ב",
+                "ג. כאן מסיח ג",
+                "ד. כאן מסיח ד"
+              ],
+              "correctIndex": 0, // אינדקס התשובה הנכונה מ-0 עד 3
+              "explanation": "הסבר מפורט ביותר בעברית מדוע זו התשובה הנכונה, ומהי המלכודת שהייתה בשאלה שמכשילה סטודנטים."
+            }
+            `;
+
+            const systemInstruction = "אתה מרצה מומחה לפיתוח יישומי אינטרנט שמכין שאלות קשות ומכשילות למבחן עבור הסטודנטים שלך. החזר אך ורק תשובת JSON תקינה.";
+
+            try {
+                const responseText = await callGeminiAPI(prompt, systemInstruction);
+                
+                let cleanJsonString = responseText;
+                if (responseText.includes("```")) {
+                    cleanJsonString = responseText.split("```")[1];
+                    if (cleanJsonString.startsWith("json")) {
+                        cleanJsonString = cleanJsonString.slice(4);
+                    }
+                }
+                
+                const questionData = JSON.parse(cleanJsonString.trim());
+                currentGeneratedQuestionObj = questionData;
+                renderGeneratedQuestion(questionData);
+            } catch (err) {
+                container.innerHTML = `
+                    <div class="text-center text-red-500 py-6 px-4">
+                        <i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i>
+                        <p class="text-xs font-bold">שגיאה ביצירת השאלה</p>
+                        <p class="text-[11px] text-slate-500 mt-1">${err.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderGeneratedQuestion(data) {
+            const container = document.getElementById('simulator-interactive-area');
+            
+            let optionsHtml = '';
+            data.options.forEach((opt, idx) => {
+                optionsHtml += `
+                    <button onclick="checkSelectedAnswer(${idx})" class="w-full text-right p-3 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-indigo-300 transition text-xs font-semibold text-slate-700 flex justify-between items-center bg-white" id="opt-btn-${idx}">
+                        <span>${escapeHtml(opt)}</span>
+                        <i class="fa-solid fa-circle text-[10px] text-slate-300" id="opt-icon-${idx}"></i>
+                    </button>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="w-full text-right">
+                    <span class="inline-block text-[9px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-bold mb-2 uppercase">
+                        ${selectedSimulatorTopic.toUpperCase()} • סימולציה דינמית
+                    </span>
+                    <h3 class="font-bold text-slate-800 text-xs md:text-sm mb-3">${escapeHtml(data.question)}</h3>
+                    
+                    <div class="space-y-2 mb-3" id="options-holder">
+                        ${optionsHtml}
+                    </div>
+
+                    <div id="simulator-feedback" class="hidden p-3 rounded-lg text-xs leading-relaxed mb-3"></div>
+
+                    <div class="flex justify-between items-center mt-2">
+                        <button id="show-explain-btn" onclick="revealSimulatorExplanation()" class="hidden text-indigo-600 hover:text-indigo-800 text-xs font-bold transition flex items-center space-x-1 space-x-reverse">
+                            <i class="fa-solid fa-lightbulb"></i>
+                            <span>הצג הסבר מפורט ומלכודת</span>
+                        </button>
+                        <button onclick="generateAIQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition mr-auto">
+                            שאלה הבאה <i class="fa-solid fa-arrow-left ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkSelectedAnswer(selectedIdx) {
+            const data = currentGeneratedQuestionObj;
+            if (!data) return;
+
+            const isCorrect = (selectedIdx === data.correctIndex);
+            document.querySelectorAll('#options-holder button').forEach(btn => btn.disabled = true);
+
+            const selectedBtn = document.getElementById(`opt-btn-${selectedIdx}`);
+            const selectedIcon = document.getElementById(`opt-icon-${selectedIdx}`);
+            const correctBtn = document.getElementById(`opt-btn-${data.correctIndex}`);
+            const correctIcon = document.getElementById(`opt-icon-${data.correctIndex}`);
+
+            if (isCorrect) {
+                selectedBtn.classList.remove('border-slate-200');
+                selectedBtn.classList.add('border-emerald-500', 'bg-emerald-50');
+                selectedIcon.className = "fa-solid fa-circle-check text-emerald-500 text-sm";
+            } else {
+                selectedBtn.classList.remove('border-slate-200');
+                selectedBtn.classList.add('border-red-500', 'bg-red-50');
+                selectedIcon.className = "fa-solid fa-circle-xmark text-red-500 text-sm";
+
+                correctBtn.classList.remove('border-slate-200');
+                correctBtn.classList.add('border-emerald-500', 'bg-emerald-50/50');
+                correctIcon.className = "fa-solid fa-circle-check text-emerald-500 text-sm";
+            }
+
+            const feedback = document.getElementById('simulator-feedback');
+            feedback.classList.remove('hidden');
+            if (isCorrect) {
+                feedback.className = "p-3 rounded-lg text-xs leading-relaxed mb-3 bg-emerald-50 text-emerald-800 border border-emerald-100";
+                feedback.innerHTML = `<strong>תשובה נכונה! כל הכבוד.</strong> קרא את ההסבר והמלכודת למטה על מנת לחזק את ההבנה לקראת המבחן.`;
+            } else {
+                feedback.className = "p-3 rounded-lg text-xs leading-relaxed mb-3 bg-red-50 text-red-800 border border-red-100";
+                feedback.innerHTML = `<strong>טעות!</strong> התשובה הנכונה היא: ${data.options[data.correctIndex].substring(0, 50)}... `;
+            }
+
+            document.getElementById('show-explain-btn').classList.remove('hidden');
+        }
+
+        function revealSimulatorExplanation() {
+            const data = currentGeneratedQuestionObj;
+            if (!data) return;
+
+            const feedback = document.getElementById('simulator-feedback');
+            feedback.innerHTML += `
+                <div class="mt-2 pt-2 border-t border-slate-200 text-slate-700">
+                    <p class="font-semibold text-indigo-700 mb-1"><i class="fa-solid fa-circle-info"></i> הסבר מפורט למבחן:</p>
+                    <p>${escapeHtml(data.explanation)}</p>
+                </div>
+            `;
+            document.getElementById('show-explain-btn').classList.add('hidden');
+        }
+
+        function appendChatMessage(sender, text) {
+            const container = document.getElementById('chat-messages-container');
+            const messageRow = document.createElement('div');
+            
+            if (sender === 'user') {
+                messageRow.className = "flex justify-end";
+                messageRow.innerHTML = `
+                    <div class="bg-indigo-600 text-white rounded-xl p-3 shadow-sm max-w-lg text-xs leading-relaxed">
+                        <p>${escapeHtml(text)}</p>
+                    </div>
+                `;
+            } else {
+                messageRow.className = "flex space-x-2 space-x-reverse max-w-lg";
+                messageRow.innerHTML = `
+                    <div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-robot text-xs"></i>
+                    </div>
+                    <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100 text-xs text-slate-700 leading-relaxed">
+                        <p>${text.replace(/\n/g, '<br>')}</p>
+                    </div>
+                `;
+            }
+
+            container.appendChild(messageRow);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendChatMessage(customText = "") {
+            const inputField = document.getElementById('chat-input-field');
+            const messageText = customText || inputField.value.trim();
+            if (!messageText) return;
+
+            if (!customText) {
+                inputField.value = "";
+            }
+
+            appendChatMessage('user', messageText);
+            chatHistory.push({ role: 'user', content: messageText });
+
+            const loaderRow = document.createElement('div');
+            loaderRow.className = "flex space-x-2 space-x-reverse max-w-lg animate-pulse";
+            loaderRow.id = "chat-typing-loader";
+            loaderRow.innerHTML = `
+                <div class="w-8 h-8 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-circle-notch animate-spin text-xs"></i>
+                </div>
+                <div class="bg-slate-100 rounded-xl p-3 max-w-xs text-slate-400 text-xs">
+                    המורה חושב...
+                </div>
+            `;
+            document.getElementById('chat-messages-container').appendChild(loaderRow);
+            document.getElementById('chat-messages-container').scrollTop = document.getElementById('chat-messages-container').scrollHeight;
+
+            const systemPrompt = `
+            אתה מורה פיתוח אינטרנט פרטי וירטואלי מעולה, המכין את הסטודנט למבחן הכללי.
+            אתה עונה אך ורק בעברית קולחת, מקצועית וברורה.
+            בכל תשובה עליך להתרכז בדיוק בסילבוס המבחן, להפנות את המשתמש להבדלים חשובים, ולהדגיש תמיד "מלכודת מבחן" (Exam Trap) שהמרצה יכול לכלול.
+            התבסס על החומר הבא:
+            ${studyMaterialContext}
+            `;
+
+            try {
+                const dialogueContext = chatHistory.map(m => `${m.role === 'user' ? 'Student' : 'Tutor'}: ${m.content}`).join("\n");
+                const aiResponse = await callGeminiAPI(dialogueContext, systemPrompt);
+                
+                const loader = document.getElementById('chat-typing-loader');
+                if (loader) loader.remove();
+
+                appendChatMessage('tutor', aiResponse);
+                chatHistory.push({ role: 'tutor', content: aiResponse });
+            } catch (err) {
+                const loader = document.getElementById('chat-typing-loader');
+                if (loader) loader.remove();
+
+                appendChatMessage('tutor', `שגיאה בתקשורת: ${err.message}. ודא שמפתח ה-API תקין.`);
+            }
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendQuickPrompt(promptText) {
+            sendChatMessage(promptText);
+        }
+
+        function clearChatHistory() {
+            chatHistory.length = 0;
+            const container = document.getElementById('chat-messages-container');
+            container.innerHTML = `
+                <div class="flex space-x-2 space-x-reverse max-w-lg">
+                    <div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-robot text-xs"></i>
+                    </div>
+                    <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100">
+                        <p class="text-xs text-slate-700 leading-relaxed">היסטוריית השיחה נוקתה! אני מוכן לשאלות חדשות בנושא פיתוח אינטרנט.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function analyzeInputCode() {
+            const code = document.getElementById('analyzer-code-input').value.trim();
+            const output = document.getElementById('analyzer-output-area');
+
+            if (!code) {
+                output.classList.remove('hidden');
+                output.innerHTML = `
+                    <p class="text-xs text-red-600 font-semibold"><i class="fa-solid fa-circle-exclamation"></i> אנא הזן קוד לניתוח תחילה.</p>
+                `;
+                return;
+            }
+
+            output.classList.remove('hidden');
+            output.innerHTML = `
+                <div class="flex items-center space-x-2 space-x-reverse py-4 justify-center">
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-600"></div>
+                    <span class="text-xs text-slate-600 font-semibold">Gemini מנתח את הקוד ומחפש מלכודות...</span>
+                </div>
+            `;
+
+            const prompt = `
+            נתח את קוד ה-Web הבא ורשום נקודות למידה למבחן.
+            קוד שהוזן:
+            ${code}
+
+            עיין בחומר הלימוד והמלכודות הכלליות המופיעות בסיכום המבחן:
+            ${studyMaterialContext}
+
+            אנא החזר תוצאות בעברית בלבד ובנויות בצורה הבאה:
+            1. האם הקוד תקין או שיש בו שגיאות קוד/תקן (למשל JSON עם גרש בודד, main כפול, div סמנטי)?
+            2. מה המרצה יכול לשאול על קוד כזה במבחן (מהי "מלכודת המבחן" הקלאסית כאן)?
+            3. מהו הפתרון / הקוד המתוקן?
+            `;
+
+            const systemInstruction = "אתה מנתח קוד מיומן לפיתוח אתרים ועוזר לסטודנטים לזהות שגיאות נפוצות ומלכודות במבחנים של המרצה.";
+
+            try {
+                const response = await callGeminiAPI(prompt, systemInstruction);
+                
+                output.innerHTML = `
+                    <div class="border-r-4 border-amber-500 bg-amber-50/50 p-4 rounded-l-lg">
+                        <h4 class="font-bold text-amber-950 text-xs mb-3 flex items-center">
+                            <i class="fa-solid fa-microscope text-amber-600 ml-1.5"></i> 
+                            תוצאות ניתוח קוד ומלכודות פוטנציאליות:
+                        </h4>
+                        <div class="text-xs text-slate-700 space-y-2 leading-relaxed">
+                            ${response.replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                output.innerHTML = `
+                    <div class="text-red-600 text-xs p-3">
+                        <i class="fa-solid fa-triangle-exclamation"></i> שגיאה בניתוח הקוד: ${err.message}. ודא שחוקיות המפתח מוגדרת כראוי.
+                    </div>
+                `;
+            }
+        }
+
+        window.onload = () => {
+            initCharts();
+            renderConcepts();
+            selectSimTopic('html');
+            renderQuizCard();
+        };
+    </script>
+</body>
+</html>
